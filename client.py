@@ -1,15 +1,48 @@
 import socket
 import threading
 
+HEADER = 64
+FORMAT = 'utf-8'
+
+
 def receive_messages():
     while True:
         try:
-            # Receive and print messages from the server
-            message = client_socket.recv(1024).decode()
-            print(message)
+            # Receive the header containing the message length and decode it using the UTF-8 format
+            data_length = client_socket.recv(HEADER).decode(FORMAT)
+            # Parse the value to an integer
+            data_length = int(data_length)
+
+            # Receive the message data from the server using the data length received from the header
+            # Blocking code - will not pass this line until data is received
+            data_message = client_socket.recv(data_length).decode(FORMAT)
+
+            print(data_message)
+
         except:
             print("Connection lost.")
             break
+
+
+def send_message(data_message):
+
+    # Encode the message data
+    data_message = data_message.encode()
+
+    # Determine the message data length to create the message header
+    data_length = len(data_message)
+
+    # Encode the data length to send
+    data_length = str(data_length).encode()
+
+    # Pad the data length to make it 64 bytes
+    data_length += b' ' * (HEADER - len(data_length))
+
+    # Send the data length (header) to the server
+    client_socket.send(data_length)
+
+    # Send the message data to the server
+    client_socket.send(data_message)
 
 
 # Create a socket object
@@ -26,4 +59,4 @@ receive_thread.start()
 # Send messages to the server
 while True:
     message = input('Enter message: ')
-    client_socket.send(message.encode())
+    send_message(message)
