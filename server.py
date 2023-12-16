@@ -31,8 +31,7 @@ def start_server():
     global server_running
     server_running = True
     server_thread = threading.Thread(target=server_worker)
-
-    print('Server started...')
+    server_thread.start()
 
 
 def stop_server():
@@ -54,6 +53,8 @@ def stop_server():
 
 def server_worker():
 
+    print('Server started...')
+
     # Listen for incoming connections
     server_socket.listen(5)
     print(f"Chat server is listening on {server_address[0]}:{server_address[1]}")
@@ -63,7 +64,7 @@ def server_worker():
         # Accept a connection
         # Get the client socket object and client address and assign to variables
         client_socket, client_address = server_socket.accept()  # Blocking code
-        print(f"Connection from {client_address}")
+        print(f"[NEW CONNECTION] {client_address}")
 
         # Add the new client to the list
         clients.append(client_socket)
