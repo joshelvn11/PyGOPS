@@ -1,6 +1,12 @@
 import socket
 import threading
 
+"""
+Sources:
+ - Python Socket Programming Tutorial - YouTube: https://www.youtube.com/watch?v=3QiPPX-KeSc
+ - ChatGPT tutorials
+"""
+
 # Define constants
 SERVER_ADDR = 'localhost'
 PORT = 5050
