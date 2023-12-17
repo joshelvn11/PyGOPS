@@ -10,7 +10,7 @@ Sources:
 
 # Define constants
 SERVER_ADDR = 'localhost'
-PORT = 5050
+PORT = 5052
 ADDR = (SERVER_ADDR, PORT)
 HEADER = 64
 FORMAT = 'utf-8'
@@ -87,6 +87,7 @@ def server_worker():
 def handle_client(client_socket):
 
     connected = True
+    username_set = False
 
     # Code will listen for data / messages from the client while they are connected
     while connected:
@@ -101,8 +102,14 @@ def handle_client(client_socket):
             # Blocking code - will not pass this line until data is received
             data_message = client_socket.recv(data_length).decode(FORMAT)
 
+            # Set the clients username
+            # The following code always assumes the first message is the clients username
+            if not username_set:
+                clients[client_socket] = data_message
+                username_set = True
+
             # Print the message to the terminal
-            print(f"[{client_socket}] {data_message}")
+            print(f"[{clients[client_socket]}] {data_message}")
 
             # If no data received or if the disconnect message is received from the client close the connection
             if not data_message or data_message == '!DISCONNECT':

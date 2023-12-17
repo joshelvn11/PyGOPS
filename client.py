@@ -49,14 +49,24 @@ def send_message(data_message):
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Connect to the server
-server_address = ('localhost', 5050)
+# server_ip = input('Please enter the server IP you would like to connect to: ')
+# server_port = input('Please enter the port to connect with')
+server_address = ('localhost', 5052)
 client_socket.connect(server_address)
+
+# Send the clients username to the server
+username = input("Please choose a name to connect with: ")
+send_message(username)
 
 # Start a thread to receive messages from the server
 receive_thread = threading.Thread(target=receive_messages)
 receive_thread.start()
 
 # Send messages to the server
+"""
 while True:
     message = input('Enter message: ')
     send_message(message)
+"""
+
+
