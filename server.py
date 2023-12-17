@@ -28,8 +28,11 @@ application_running = True
 # Variable to track the server state
 server_running = True
 
-# List to store connected clients
+# Dictionary to store connected clients
 clients = {}
+
+# Dictionary to store active games
+games = {}
 
 
 def start_server():
