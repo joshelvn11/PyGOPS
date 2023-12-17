@@ -29,7 +29,7 @@ application_running = True
 server_running = True
 
 # List to store connected clients
-clients = []
+clients = {}
 
 
 def start_server():
@@ -63,7 +63,7 @@ def server_worker():
     print('Server started...')
 
     # Listen for incoming connections
-    server_socket.listen(5)
+    server_socket.listen()
     print(f"Chat server is listening on {server_address[0]}:{server_address[1]}")
 
     while server_running:
@@ -73,8 +73,8 @@ def server_worker():
         client_socket, client_address = server_socket.accept()  # Blocking code
         print(f"[NEW CONNECTION] {client_address}")
 
-        # Add the new client to the list
-        clients.append(client_socket)
+        # Add the new client to the dict with a default username
+        clients[client_socket] = f"User: {len(clients)}"
 
         # Create a new thread to handle the client
         client_thread = threading.Thread(target=handle_client, args=(client_socket,))
@@ -116,7 +116,8 @@ def handle_client(client_socket):
             break
 
     # Remove the client from the list and close the connection
-    clients.remove(client_socket)
+    print(f"[REMOVE CLIENT] {clients[client_socket]}")
+    del clients[client_socket]
     client_socket.close()
 
 
