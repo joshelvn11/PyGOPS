@@ -1,5 +1,6 @@
 import socket
 import threading
+import networking
 
 """
 Sources:
@@ -108,7 +109,7 @@ def handle_client(client_socket):
                 connected = False
 
             # Broadcast the message to all clients
-            broadcast(data_message, client_socket)
+            networking.broadcast(data_message, client_socket, clients, HEADER)
 
         except Exception as e:
             print(f"Error: {e}")
@@ -117,31 +118,6 @@ def handle_client(client_socket):
     # Remove the client from the list and close the connection
     clients.remove(client_socket)
     client_socket.close()
-
-
-def broadcast(data_message, sender_socket):
-    # Encode the message data
-    data_message = data_message.encode()
-
-    # Determine the message data length to create the message header
-    data_length = len(data_message)
-
-    # Encode the data length to send
-    data_length = str(data_length).encode()
-
-    # Pad the data length to make it 64 bytes
-    data_length += b' ' * (HEADER - len(data_length))
-
-    for client in clients:
-        try:
-            # Send the data length (header) to the client
-            client.send(data_length)
-
-            # Send the message data to the client
-            client.send(data_message)
-        except:
-            # If sending fails, remove the client from the list
-            clients.remove(client)
 
 
 while application_running:
