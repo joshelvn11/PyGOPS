@@ -87,15 +87,21 @@ username = input("Please choose a name to connect with: ")
 message = f"SET-USERNAME~{username}"
 send_message(message)
 
+# Wait for response that set username has been successful
 receive_response()
 
 # Ask if the client would like to create a game or connect to an existing game
 start_game = input("Would you like to [1] connect to a game or [2] create a game: ")
-message = f"START-GAME~{start_game}"
-send_message(message)
 
-receive_response()
+if start_game == '1':
+    message = f"START-GAME~{start_game}"
+    send_message(message)
 
+    # Wait for response that server has received start new game command
+    receive_response()
+
+    # Wait for response that new game has been started and the game ID
+    receive_response()
 
 
 

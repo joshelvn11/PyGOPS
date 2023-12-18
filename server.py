@@ -136,11 +136,24 @@ class Server:
                         print(f"[RESPONSE TO CLIENT] {message_response}")
                     elif message_command == 'START-GAME':
                         if message_body == '1':
+
                             print("[STARTING GAME]")
                             message_response = f"[STARTING NEW GAME]"
                             networking.send_message(message_response, client_socket, Server.HEADER)
                             print(f"[RESPONSE TO CLIENT] {message_response}")
+
+                            # Create new game instance and generate a new game ID for the instance
                             game_instance = game.Game(self)
+                            game_id = game_instance.generate_id()
+                            print(f"[NEW GAME] New game started with ID [{game_id}]")
+
+                            # Add the game instance to class dictionary with the ID as the key
+                            Server.games[game_id] = game_instance
+
+                            # Respond to the client that the game has started
+                            message_response = f"[GAME STARTED] New Game started with ID = {game_id}"
+                            networking.send_message(message_response, client_socket, Server.HEADER)
+                            print(f"[RESPONSE TO CLIENT] {message_response}")
 
                     # If no data received or if the disconnect message is received from the client close the connection
                     if not data_message or data_message == '!DISCONNECT':
@@ -163,8 +176,6 @@ if __name__ == '__main__':
     # Create an instance of the Server class
     print('Creating server instance')
     server_instance = Server()
-    server_instance2 = Server()
-    print(server_instance is server_instance2)
 
     # Start the server
     print('Starting the server')
@@ -192,9 +203,15 @@ if __name__ == '__main__':
         elif command == 'active-clients-usernames':
             print("List of currently active client usernames:")
             for client in server_instance.clients.values():
-                    print(client[2])
+                print(client[2])
         elif command == 'active-games':
-            pass
+            print("List of currently active games:")
+            for game_id in Server.games:
+                print(f"[{game_id}]: {Server.games[game_id]}")
+        elif command == 'active-games':
+            print("List of currently active game ids:")
+            for game_id in Server.games:
+                print(f"[{game_id}]")
         else:
             print('Please enter a valid command')
 
