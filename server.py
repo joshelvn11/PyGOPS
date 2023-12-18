@@ -11,7 +11,7 @@ Sources:
 
 # Define constants
 SERVER_ADDR = 'localhost'
-PORT = 5058
+PORT = 5059
 ADDR = (SERVER_ADDR, PORT)
 HEADER = 64
 FORMAT = 'utf-8'
@@ -37,7 +37,8 @@ games = {}
 
 # ---------- FUNCTION DEFINITIONS -----
 
-# Function to start the serverr
+
+# Function to start the server
 def start_server():
     print('Starting server...')
 
@@ -45,6 +46,7 @@ def start_server():
     server_running = True
     server_thread = threading.Thread(target=server_worker)
     server_thread.start()
+
 
 # Function to shut down the server and close all sockets
 def stop_server():
@@ -55,8 +57,8 @@ def stop_server():
     server_running = False
 
     # Close all client connections
-    for client_socket in clients:
-        client_socket.close()
+    for client_socket in clients.values():
+        client_socket[0].close()
 
     # Close the server socket
     server_socket.close()
