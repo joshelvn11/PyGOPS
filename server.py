@@ -11,7 +11,7 @@ Sources:
 
 # Define constants
 SERVER_ADDR = 'localhost'
-PORT = 5057
+PORT = 5058
 ADDR = (SERVER_ADDR, PORT)
 HEADER = 64
 FORMAT = 'utf-8'
@@ -98,32 +98,43 @@ def handle_client(client_socket):
 
             # Receive the header containing the message length and decode it using the UTF-8 format
             data_length = client_socket.recv(HEADER).decode(FORMAT)
-            # Parse the value to an integer
-            data_length = int(data_length)
 
-            # Receive the message data from the client using the data length received from the header
-            # Blocking code - will not pass this line until data is received
-            data_message = client_socket.recv(data_length).decode(FORMAT)
+            # Only attempt to handle the message if it has data (i.e the header is not empty)
+            if data_length:
 
-            # Print the message to the terminal
-            print(f"[{client_socket}] {data_message}")
+                # Parse the value to an integer
+                data_length = int(data_length)
 
-            # Split the string into the command and message content
-            message_command = data_message.split('~')[0]
-            message_body = data_message.split('~')[1]
+                # Receive the message data from the client using the data length received from the header
+                # Blocking code - will not pass this line until data is received
+                data_message = client_socket.recv(data_length).decode(FORMAT)
 
-            # Process the command and message
-            if message_command == 'SET-USERNAME':
-                clients[client_socket] = message_body
-                message_response = f"[SUCCESS] Username set to {clients[client_socket]} successfully"
-                networking.send_message(message_response, client_socket, HEADER)
+                # Print the message to the terminal
+                print(f"[{client_socket}] {data_message}")
 
-            # If no data received or if the disconnect message is received from the client close the connection
-            if not data_message or data_message == '!DISCONNECT':
-                connected = False
+                # Split the string into the command and message content
+                message_command = data_message.split('~')[0]
+                message_body = data_message.split('~')[1]
 
-            # Broadcast the message to all clients
-            # networking.broadcast(data_message, client_socket, clients, HEADER)
+                # Process the command and message
+                if message_command == 'SET-USERNAME':
+                    clients[client_socket] = message_body
+                    message_response = f"[SUCCESS] Username set to {clients[client_socket]} successfully"
+                    networking.send_message(message_response, client_socket, HEADER)
+                    print(f"[RESPONSE TO CLIENT] {message_response}")
+                elif message_command == 'START-GAME':
+                    if message_body == '1':
+                        print("[STARTING GAME]")
+                        message_response = f"[STARING NEW GAME]"
+                        networking.send_message(message_response, client_socket, HEADER)
+                        print(f"[RESPONSE TO CLIENT] {message_response}")
+
+                # If no data received or if the disconnect message is received from the client close the connection
+                if not data_message or data_message == '!DISCONNECT':
+                    connected = False
+
+                # Broadcast the message to all clients
+                # networking.broadcast(data_message, client_socket, clients, HEADER)
 
         except Exception as e:
             print(f"Error: {e}")
