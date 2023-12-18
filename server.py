@@ -4,11 +4,15 @@ import networking
 import game
 
 
+#  FUNCTION DECLARATION ------------------------------------------------------------------------------------------------
 def get_clients():
     return Server.clients
 
 
 class Server:
+
+    # CLASS VARIABLES --------------------------------------------------------------------------------------------------
+
     _instance = None
     server_started = False
 
@@ -25,6 +29,7 @@ class Server:
     # Dictionary to store active games
     games = {}
 
+    # OBJECT INITIALIZATION --------------------------------------------------------------------------------------------
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
             cls._instance = super(Server, cls).__new__(cls)
@@ -45,7 +50,7 @@ class Server:
 
         return cls._instance
 
-    # ---------- FUNCTION DEFINITIONS -----
+    # METHOD DECLARATION -----------------------------------------------------------------------------------------------
 
     # Function to start the server
     def start_server(self):
@@ -170,8 +175,8 @@ class Server:
         # clients.remove(client_socket)
         client_socket.close()
 
-    # ---------- APPLICATION LOGIC -----
 
+# APPLICATION LOGIC ----------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
     # Create an instance of the Server class
     print('Creating server instance')
