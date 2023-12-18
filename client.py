@@ -78,10 +78,6 @@ client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_address = ('localhost', 5069)
 client_socket.connect(server_address)
 
-# Start a thread to receive messages from the server
-# receive_thread = threading.Thread(target=receive_messages)
-# receive_thread.start()
-
 # Send the clients username to the server
 username = input("Please choose a name to connect with: ")
 message = f"SET-USERNAME~{username}"
@@ -104,4 +100,6 @@ if start_game == '1':
     receive_response()
 
 
-
+# Start a thread to receive messages from the server
+# receive_thread = threading.Thread(target=receive_messages)
+# receive_thread.start()

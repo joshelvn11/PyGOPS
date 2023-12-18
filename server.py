@@ -148,7 +148,7 @@ class Server:
                             print(f"[RESPONSE TO CLIENT] {message_response}")
 
                             # Create new game instance and generate a new game ID for the instance
-                            game_instance = game.Game(self)
+                            game_instance = game.Game(self, Server.clients[client_socket])
                             game_id = game_instance.generate_id()
                             print(f"[NEW GAME] New game started with ID [{game_id}]")
 
