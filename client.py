@@ -75,28 +75,27 @@ client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # Connect to the server
 # server_ip = input('Please enter the server IP you would like to connect to: ')
 # server_port = input('Please enter the port to connect with')
-server_address = ('localhost', 5057)
+server_address = ('localhost', 5058)
 client_socket.connect(server_address)
 
 # Start a thread to receive messages from the server
-receive_thread = threading.Thread(target=receive_messages)
-receive_thread.start()
+# receive_thread = threading.Thread(target=receive_messages)
+# receive_thread.start()
 
 # Send the clients username to the server
 username = input("Please choose a name to connect with: ")
 message = f"SET-USERNAME~{username}"
 send_message(message)
 
-# Wait for the response
-# receive_response()
+receive_response()
+
+# Ask if the client would like to create a game or connect to an existing game
+start_game = input("Would you like to [1] connect to a game or [2] create a game: ")
+message = f"START-GAME~{start_game}"
+send_message(message)
+
+receive_response()
 
 
-
-# Send messages to the server
-"""
-while True:
-    message = input('Enter message: ')
-    send_message(message)
-"""
 
 
