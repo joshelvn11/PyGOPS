@@ -85,7 +85,7 @@ def server_worker():
         client_thread.start()
 
         # List the active threads / connections
-        print(f"[ACTIVE CONNECTIONS] {threading.activeCount() - 1}")
+        print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 1}")
 
 
 def handle_client(client_socket):
@@ -125,7 +125,7 @@ def handle_client(client_socket):
                 elif message_command == 'START-GAME':
                     if message_body == '1':
                         print("[STARTING GAME]")
-                        message_response = f"[STARING NEW GAME]"
+                        message_response = f"[STARTING NEW GAME]"
                         networking.send_message(message_response, client_socket, HEADER)
                         print(f"[RESPONSE TO CLIENT] {message_response}")
 
@@ -198,7 +198,6 @@ def handle_client(client_socket):
 #     print(f"[REMOVE CLIENT] {clients[client_socket]}")
 #     del clients[client_socket]
 #     client_socket.close()
-
 
 start_server()
 
