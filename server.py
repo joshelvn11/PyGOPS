@@ -82,7 +82,7 @@ def server_worker():
         print(f"[NEW CONNECTION] {client_address}")
 
         # Add the new client to the dict with a default username
-        clients[client_socket] = f"User: {len(clients)}"
+        clients[client_socket] = [client_socket, client_address, f"User: {len(clients)}"]
 
         # Create a new thread to handle the client
         client_thread = threading.Thread(target=handle_client, args=(client_socket,))
@@ -123,7 +123,7 @@ def handle_client(client_socket):
 
                 # Process the command and message
                 if message_command == 'SET-USERNAME':
-                    clients[client_socket] = message_body
+                    clients[client_socket][2] = message_body
                     message_response = f"[SUCCESS] Username set to {clients[client_socket]} successfully"
                     networking.send_message(message_response, client_socket, HEADER)
                     print(f"[RESPONSE TO CLIENT] {message_response}")
@@ -165,7 +165,6 @@ while application_running:
         break
     elif command == 'active-sockets':
         print("List of currently active client sockets:")
-        for key
     elif command == 'active-clients':
         pass
     elif command == 'active-games':
