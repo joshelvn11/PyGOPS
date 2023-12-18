@@ -1,188 +1,202 @@
 import socket
 import threading
 import networking
-import sys
-
-"""
-Sources:
- - Python Socket Programming Tutorial - YouTube: https://www.youtube.com/watch?v=3QiPPX-KeSc
- - ChatGPT tutorials
-"""
-
-# Define constants
-SERVER_ADDR = 'localhost'
-PORT = 5059
-ADDR = (SERVER_ADDR, PORT)
-HEADER = 64
-FORMAT = 'utf-8'
-
-# Create a socket object
-server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-# Bind the socket to a specific address and port
-server_address = (SERVER_ADDR, PORT)
-server_socket.bind(server_address)
-
-# Variable to track the application state
-application_running = True
-
-# Variable to track the server state
-server_running = True
-
-# Dictionary to store connected clients
-clients = {}
-
-# Dictionary to store active games
-games = {}
-
-# ---------- FUNCTION DEFINITIONS -----
+import game
 
 
-# Function to start the server
-def start_server():
-    print('Starting server...')
-
-    global server_running
-    server_running = True
-    server_thread = threading.Thread(target=server_worker)
-    server_thread.start()
+def get_clients():
+    return Server.clients
 
 
-# Function to shut down the server and close all sockets
-def stop_server():
+class Server:
+    _instance = None
+    server_started = False
 
-    print('Stopping server...')
+    # Define constants
+    SERVER_ADDR = 'localhost'
+    PORT = 5069
+    ADDR = (SERVER_ADDR, PORT)
+    HEADER = 64
+    FORMAT = 'utf-8'
 
-    global server_running
-    server_running = False
+    # Dictionary to store connected clients
+    clients = {}
 
-    # Close all client connections
-    for client_socket in clients.values():
-        client_socket[0].close()
+    # Dictionary to store active games
+    games = {}
 
-    # Close the server socket
-    server_socket.close()
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = super(Server, cls).__new__(cls)
+            # Additional initialization code can be added here
+            print('Server initialized')
+            # Create a socket object
+            cls.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    print('Server stopped...')
+            # Bind the socket to a specific address and port
+            cls.server_address = (Server.SERVER_ADDR, Server.PORT)
+            cls.server_socket.bind(cls.server_address)
 
+            # Variable to track the application state
+            cls.application_running = True
 
-# Server worker to be run as independent thread. Listens for connection requests and
-# starts threads to handle clients
-def server_worker():
+            # Variable to track the server state
+            cls.server_running = True
 
-    print('Server started...')
+        return cls._instance
 
-    # Listen for incoming connections
-    server_socket.listen()
-    print(f"[SERVER-STARTED] Listening on {server_address[0]}:{server_address[1]}")
+    # ---------- FUNCTION DEFINITIONS -----
 
-    while server_running:
+    # Function to start the server
+    def start_server(self):
 
-        # Accept a connection
-        # Get the client socket object and client address and assign to variables
-        client_socket, client_address = server_socket.accept()  # Blocking code
-        print(f"[NEW CONNECTION] {client_address}")
+        print('Starting server...')
 
-        # Add the new client to the dict with a default username
-        clients[client_socket] = [client_socket, client_address, f"User: {len(clients)}"]
+        server_running = True
+        server_thread = threading.Thread(target=self.server_worker)
+        server_thread.start()
 
-        # Create a new thread to handle the client
-        client_thread = threading.Thread(target=handle_client, args=(client_socket,))
-        client_thread.start()
+    # Function to shut down the server and close all sockets
+    def stop_server(self):
 
-        # List the active threads / connections
-        print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 1}")
+        print('Stopping server...')
 
+        server_running = False
 
-# Function to handle individual clients and listen for messages from each client
-def handle_client(client_socket):
+        # Close all client connections
+        for client_socket in self.clients.values():
+            client_socket[0].close()
 
-    connected = True
+        # Close the server socket
+        self.server_socket.close()
 
-    # Code will listen for data / messages from the client while they are connected
-    while connected:
-        try:
+        print('Server stopped...')
 
-            # Receive the header containing the message length and decode it using the UTF-8 format
-            data_length = client_socket.recv(HEADER).decode(FORMAT)
+    # Server worker to be run as independent thread. Listens for connection requests and
+    # starts threads to handle clients
+    def server_worker(self):
 
-            # Only attempt to handle the message if it has data (i.e the header is not empty)
-            if data_length:
+        print('Server started...')
 
-                # Parse the value to an integer
-                data_length = int(data_length)
+        # Listen for incoming connections
+        self.server_socket.listen()
+        print(f"[SERVER-STARTED] Listening on {self.server_address[0]}:{self.server_address[1]}")
 
-                # Receive the message data from the client using the data length received from the header
-                # Blocking code - will not pass this line until data is received
-                data_message = client_socket.recv(data_length).decode(FORMAT)
+        while self.server_running:
+            # Accept a connection
+            # Get the client socket object and client address and assign to variables
+            client_socket, client_address = self.server_socket.accept()  # Blocking code
+            print(f"[NEW CONNECTION] {client_address}")
 
-                # Print the message to the terminal
-                print(f"[{client_socket}] {data_message}")
+            # Add the new client to the dict with a default username
+            Server.clients[client_socket] = [client_socket, client_address, f"User: {len(Server.clients)}"]
+            print(f"[CLIENT-LIST] {Server.clients}")
 
-                # Split the string into the command and message content
-                message_command = data_message.split('~')[0]
-                message_body = data_message.split('~')[1]
+            # Create a new thread to handle the client
+            client_thread = threading.Thread(target=self.handle_client, args=(client_socket,))
+            client_thread.start()
 
-                # Process the command and message
-                if message_command == 'SET-USERNAME':
-                    clients[client_socket][2] = message_body
-                    message_response = f"[SUCCESS] Username set to {clients[client_socket]} successfully"
-                    networking.send_message(message_response, client_socket, HEADER)
-                    print(f"[RESPONSE TO CLIENT] {message_response}")
-                elif message_command == 'START-GAME':
-                    if message_body == '1':
-                        print("[STARTING GAME]")
-                        message_response = f"[STARTING NEW GAME]"
-                        networking.send_message(message_response, client_socket, HEADER)
+            # List the active threads / connections
+            print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 1}")
+
+    # Function to handle individual clients and listen for messages from each client
+    def handle_client(self, client_socket):
+
+        connected = True
+
+        # Code will listen for data / messages from the client while they are connected
+        while connected:
+            try:
+
+                # Receive the header containing the message length and decode it using the UTF-8 format
+                data_length = client_socket.recv(Server.HEADER).decode(Server.FORMAT)
+
+                # Only attempt to handle the message if it has data (i.e the header is not empty)
+                if data_length:
+
+                    # Parse the value to an integer
+                    data_length = int(data_length)
+
+                    # Receive the message data from the client using the data length received from the header
+                    # Blocking code - will not pass this line until data is received
+                    data_message = client_socket.recv(data_length).decode(Server.FORMAT)
+
+                    # Print the message to the terminal
+                    print(f"[{client_socket}] {data_message}")
+
+                    # Split the string into the command and message content
+                    message_command = data_message.split('~')[0]
+                    message_body = data_message.split('~')[1]
+
+                    # Process the command and message
+                    if message_command == 'SET-USERNAME':
+                        Server.clients[client_socket][2] = message_body
+                        message_response = f"[SUCCESS] Username set to {Server.clients[client_socket]} successfully"
+                        networking.send_message(message_response, client_socket, Server.HEADER)
                         print(f"[RESPONSE TO CLIENT] {message_response}")
+                    elif message_command == 'START-GAME':
+                        if message_body == '1':
+                            print("[STARTING GAME]")
+                            message_response = f"[STARTING NEW GAME]"
+                            networking.send_message(message_response, client_socket, Server.HEADER)
+                            print(f"[RESPONSE TO CLIENT] {message_response}")
+                            game_instance = game.Game(self)
 
-                # If no data received or if the disconnect message is received from the client close the connection
-                if not data_message or data_message == '!DISCONNECT':
-                    connected = False
+                    # If no data received or if the disconnect message is received from the client close the connection
+                    if not data_message or data_message == '!DISCONNECT':
+                        connected = False
 
-                # Broadcast the message to all clients
-                # networking.broadcast(data_message, client_socket, clients, HEADER)
+                    # Broadcast the message to all clients
+                    # networking.broadcast(data_message, client_socket, clients, HEADER)
 
-        except Exception as e:
-            print(f"Error: {e}")
+            except Exception as e:
+                print(f"Error: {e}")
+                break
+
+        # Remove the client from the list and close the connection
+        # clients.remove(client_socket)
+        client_socket.close()
+
+    # ---------- APPLICATION LOGIC -----
+
+if __name__ == '__main__':
+    # Create an instance of the Server class
+    print('Creating server instance')
+    server_instance = Server()
+    server_instance2 = Server()
+    print(server_instance is server_instance2)
+
+    # Start the server
+    print('Starting the server')
+    server_instance.start_server()
+
+    while True:
+        command = input('$: ')
+
+        if command == 'server-start':
+            server_instance.start_server()
+        elif command == 'server-stop':
+            server_instance.stop_server()
+        elif command == 'quit':
             break
-
-    # Remove the client from the list and close the connection
-    # clients.remove(client_socket)
-    client_socket.close()
-
-
-# ---------- APPLICATION LOGIC -----
-
-start_server()
-
-while application_running:
-    command = input('$: ')
-
-    if command == 'server-start':
-        start_server()
-    elif command == 'server-stop':
-        stop_server()
-    elif command == 'quit':
-        break
-    elif command == 'active-clients':
-        print("List of currently active clients:")
-        for client in clients.values():
-            print(client)
-    elif command == 'active-clients-sockets':
-        for client in clients.values():
-            print(client[0])
-    elif command == 'active-clients-addresses':
-        for client in clients.values():
-            print(client[1])
-    elif command == 'active-clients-usernames':
-        print("List of currently active client usernames:")
-        for client in clients.values():
-            print(client[2])
-    elif command == 'active-games':
-        pass
-    else:
-        print('Please enter a valid command')
+        elif command == 'active-clients':
+            print("List of currently active clients:")
+            for client in server_instance.clients.values():
+                print(client)
+        elif command == 'active-clients-sockets':
+            for client in server_instance.clients.values():
+                print(client[0])
+        elif command == 'active-clients-addresses':
+            for client in server_instance.clients.values():
+                print(client[1])
+        elif command == 'active-clients-usernames':
+            print("List of currently active client usernames:")
+            for client in server_instance.clients.values():
+                    print(client[2])
+        elif command == 'active-games':
+            pass
+        else:
+            print('Please enter a valid command')
 
 
 

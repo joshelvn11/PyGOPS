@@ -75,7 +75,7 @@ client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # Connect to the server
 # server_ip = input('Please enter the server IP you would like to connect to: ')
 # server_port = input('Please enter the port to connect with')
-server_address = ('localhost', 5059)
+server_address = ('localhost', 5069)
 client_socket.connect(server_address)
 
 # Start a thread to receive messages from the server
