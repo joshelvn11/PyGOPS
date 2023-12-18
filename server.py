@@ -163,10 +163,20 @@ while application_running:
         stop_server()
     elif command == 'quit':
         break
-    elif command == 'active-sockets':
-        print("List of currently active client sockets:")
     elif command == 'active-clients':
-        pass
+        print("List of currently active clients:")
+        for client in clients.values():
+            print(client)
+    elif command == 'active-clients-sockets':
+        for client in clients.values():
+            print(client[0])
+    elif command == 'active-clients-addresses':
+        for client in clients.values():
+            print(client[1])
+    elif command == 'active-clients-usernames':
+        print("List of currently active client usernames:")
+        for client in clients.values():
+            print(client[2])
     elif command == 'active-games':
         pass
     else:
