@@ -1,6 +1,7 @@
 import socket
 import threading
 import networking
+import sys
 
 """
 Sources:
@@ -10,7 +11,7 @@ Sources:
 
 # Define constants
 SERVER_ADDR = 'localhost'
-PORT = 5052
+PORT = 5057
 ADDR = (SERVER_ADDR, PORT)
 HEADER = 64
 FORMAT = 'utf-8'
@@ -67,7 +68,7 @@ def server_worker():
 
     # Listen for incoming connections
     server_socket.listen()
-    print(f"Chat server is listening on {server_address[0]}:{server_address[1]}")
+    print(f"[SERVER-STARTED] Listening on {server_address[0]}:{server_address[1]}")
 
     while server_running:
 
@@ -90,7 +91,6 @@ def server_worker():
 def handle_client(client_socket):
 
     connected = True
-    username_set = False
 
     # Code will listen for data / messages from the client while they are connected
     while connected:
@@ -105,34 +105,94 @@ def handle_client(client_socket):
             # Blocking code - will not pass this line until data is received
             data_message = client_socket.recv(data_length).decode(FORMAT)
 
-            # Set the clients username
-            # The following code always assumes the first message is the clients username
-            if not username_set:
-                clients[client_socket] = data_message
-                username_set = True
-
             # Print the message to the terminal
-            print(f"[{clients[client_socket]}] {data_message}")
+            print(f"[{client_socket}] {data_message}")
+
+            # Split the string into the command and message content
+            message_command = data_message.split('~')[0]
+            message_body = data_message.split('~')[1]
+
+            # Process the command and message
+            if message_command == 'SET-USERNAME':
+                clients[client_socket] = message_body
+                message_response = f"[SUCCESS] Username set to {clients[client_socket]} successfully"
+                networking.send_message(message_response, client_socket, HEADER)
 
             # If no data received or if the disconnect message is received from the client close the connection
             if not data_message or data_message == '!DISCONNECT':
                 connected = False
 
             # Broadcast the message to all clients
-            networking.broadcast(data_message, client_socket, clients, HEADER)
+            # networking.broadcast(data_message, client_socket, clients, HEADER)
 
         except Exception as e:
             print(f"Error: {e}")
             break
 
     # Remove the client from the list and close the connection
-    print(f"[REMOVE CLIENT] {clients[client_socket]}")
-    del clients[client_socket]
+    # clients.remove(client_socket)
     client_socket.close()
 
 
+# def handle_client(client_socket):
+#
+#     connected = True
+#     username_set = False
+#
+#     # Code will listen for data / messages from the client while they are connected
+#     while connected:
+#         try:
+#
+#             # Receive the header containing the message length and decode it using the UTF-8 format
+#             data_length = client_socket.recv(HEADER).decode(FORMAT)
+#
+#             # Parse the value to an integer
+#             data_length = int(data_length)
+#             print(f"[HEADER] {data_length}")
+#
+#             # Receive the message data from the client using the data length received from the header
+#             # Blocking code - will not pass this line until data is received
+#             data_message = client_socket.recv(1024).decode(FORMAT)
+#             print(f"[{clients[client_socket]}] {data_message}")
+#
+#             # Split the string into the command and message content
+#             message_command = data_message.split('~')[0]
+#             message_body = data_message.split('~')[1]
+#
+#             # Process the command and message
+#             if message_command == 'SET-USERNAME':
+#                 clients[client_socket] = message_body
+#                 message_response = f"[SUCCESS] Username set to {clients[client_socket]} successfully"
+#                 message_response = message_response.encode()
+#                 client_socket.send(message_response)
+#
+#             # Print the message to the terminal
+#             print(f"[{clients[client_socket]}] {data_message}")
+#
+#             # If no data received or if the disconnect message is received from the client close the connection
+#             if not data_message or data_message == '!DISCONNECT':
+#                 connected = False
+#
+#             # Broadcast the message to all clients
+#             # networking.broadcast(data_message, client_socket, clients, HEADER)
+#
+#         except Exception as e:
+#             print(f"Error: {e}")
+#             exception_type, exception_instance, traceback = sys.exc_info()
+#             print(f"Caught exception of type: {exception_type.__name__}")
+#             print(f"Exception instance: {exception_instance}")
+#             break
+#
+#     # Remove the client from the list and close the connection
+#     print(f"[REMOVE CLIENT] {clients[client_socket]}")
+#     del clients[client_socket]
+#     client_socket.close()
+
+
+start_server()
+
 while application_running:
-    command = input('Enter a command: ')
+    command = input('$: ')
 
     if command == 'server-start':
         start_server()
