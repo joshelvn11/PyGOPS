@@ -39,10 +39,19 @@ def receive_response():
         # Blocking code - will not pass this line until data is received
         data_message = client_socket.recv(data_length).decode(FORMAT)
 
-        print(data_message)
+        # Split the string into the command and message content
+        message_command = data_message.split('~')[0]
+        message_body = data_message.split('~')[1]
 
-    except:
-        print("Connection lost.")
+        # Print info message directly to the console
+        if message_command == 'INFO':
+            print(message_body)
+
+        return message_command, message_body
+
+    except Exception as e:
+        print(f"[ERROR] Error in receive_response()")
+        print(f"[ERROR INFO] {e}")
 
 
 def send_message(data_message):
@@ -75,7 +84,7 @@ client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # Connect to the server
 # server_ip = input('Please enter the server IP you would like to connect to: ')
 # server_port = input('Please enter the port to connect with')
-server_address = ('localhost', 5069)
+server_address = ('localhost', 5071)
 client_socket.connect(server_address)
 
 # Send the clients username to the server
@@ -86,18 +95,42 @@ send_message(message)
 # Wait for response that set username has been successful
 receive_response()
 
-# Ask if the client would like to create a game or connect to an existing game
-start_game = input("Would you like to [1] connect to a game or [2] create a game: ")
 
-if start_game == '1':
-    message = f"START-GAME~{start_game}"
-    send_message(message)
+# Start game procedure
+def start_game_procedure():
+    # Ask if the client would like to create a game or connect to an existing game
+    start_game = input("Would you like to [1] create a game [2] connect to a game: ")
 
-    # Wait for response that server has received start new game command
-    receive_response()
+    if start_game == '1':
+        message = f"START-GAME~{start_game}"
+        send_message(message)
 
-    # Wait for response that new game has been started and the game ID
-    receive_response()
+        # Wait for response that server has received start new game command
+        receive_response()
+
+        # Wait for response that new game has been started and the game ID
+        receive_response()
+
+    elif start_game == '2':
+        game_id = input("Please enter the ID of the game you wish to join: ")
+        message = f"JOIN-GAME~{game_id}"
+        send_message(message)
+
+        # Wait for response if joining the game was successful
+        response_command, response_body = receive_response()
+
+        if response_command == 'TRUE':
+            print(response_body)
+        elif response_command == 'FALSE':
+            print(response_body)
+            start_game_procedure()
+
+    else:
+        print("Please enter a valid option.")
+        start_game_procedure()
+
+
+start_game_procedure()
 
 
 # Start a thread to receive messages from the server

@@ -18,7 +18,7 @@ class Server:
 
     # Define constants
     SERVER_ADDR = 'localhost'
-    PORT = 5069
+    PORT = 5071
     ADDR = (SERVER_ADDR, PORT)
     HEADER = 64
     FORMAT = 'utf-8'
@@ -85,17 +85,16 @@ class Server:
 
         # Listen for incoming connections
         self.server_socket.listen()
-        print(f"[SERVER-STARTED] Listening on {self.server_address[0]}:{self.server_address[1]}")
+        print(f"[SERVER STARTED] Listening on {self.server_address[0]}:{self.server_address[1]}")
 
         while self.server_running:
             # Accept a connection
             # Get the client socket object and client address and assign to variables
             client_socket, client_address = self.server_socket.accept()  # Blocking code
-            print(f"[NEW CONNECTION] {client_address}")
+            print(f"[NEW CONNECTION] New connection from {client_address}")
 
             # Add the new client to the dict with a default username
             Server.clients[client_socket] = [client_socket, client_address, f"User: {len(Server.clients)}"]
-            print(f"[CLIENT-LIST] {Server.clients}")
 
             # Create a new thread to handle the client
             client_thread = threading.Thread(target=self.handle_client, args=(client_socket,))
@@ -116,7 +115,7 @@ class Server:
                 # Receive the header containing the message length and decode it using the UTF-8 format
                 data_length = client_socket.recv(Server.HEADER).decode(Server.FORMAT)
 
-                # Only attempt to handle the message if it has data (i.e the header is not empty)
+                # Only attempt to handle the message if it has data (i.e. the header is not empty)
                 if data_length:
 
                     # Parse the value to an integer
@@ -136,29 +135,41 @@ class Server:
                     # Process the command and message
                     if message_command == 'SET-USERNAME':
                         Server.clients[client_socket][2] = message_body
-                        message_response = f"[SUCCESS] Username set to {Server.clients[client_socket]} successfully"
+                        message_response = (f"INFO~[SUCCESS] Username set to '{Server.clients[client_socket][2]}'"
+                                            f" successfully")
                         networking.send_message(message_response, client_socket, Server.HEADER)
-                        print(f"[RESPONSE TO CLIENT] {message_response}")
+                        # print(f"[RESPONSE TO CLIENT] {message_response}")
+
                     elif message_command == 'START-GAME':
-                        if message_body == '1':
 
-                            print("[STARTING GAME]")
-                            message_response = f"[STARTING NEW GAME]"
+                        print("[STARTING GAME]")
+                        message_response = f"INFO~[STARTING NEW GAME]"
+                        networking.send_message(message_response, client_socket, Server.HEADER)
+                        # print(f"[RESPONSE TO CLIENT] {message_response}")
+
+                        # Create new game instance and generate a new game ID for the instance
+                        game_instance = game.Game(self, Server.clients[client_socket])
+                        game_id = game_instance.generate_id()
+                        print(f"[NEW GAME] New game started with ID [{game_id}] by {Server.clients[client_socket][2]}")
+
+                        # Add the game instance to class dictionary with the ID as the key
+                        Server.games[game_id] = game_instance
+
+                        # Respond to the client that the game has started
+                        message_response = f"INFO~[GAME STARTED] New Game started with ID: {game_id}"
+                        networking.send_message(message_response, client_socket, Server.HEADER)
+                        # print(f"[RESPONSE TO CLIENT] {message_response}")
+
+                    elif message_command == 'JOIN-GAME':
+
+                        if message_body in Server.games:
+                            # Pass the player over to the game instance to handle
+                            Server.games[message_body].add_player(Server.clients[client_socket])
+                        else:
+                            # Respond to the client that the game does not exist
+                            message_response = f"FALSE~[COULD NOT JOIN] Game does does not exist"
                             networking.send_message(message_response, client_socket, Server.HEADER)
-                            print(f"[RESPONSE TO CLIENT] {message_response}")
-
-                            # Create new game instance and generate a new game ID for the instance
-                            game_instance = game.Game(self, Server.clients[client_socket])
-                            game_id = game_instance.generate_id()
-                            print(f"[NEW GAME] New game started with ID [{game_id}]")
-
-                            # Add the game instance to class dictionary with the ID as the key
-                            Server.games[game_id] = game_instance
-
-                            # Respond to the client that the game has started
-                            message_response = f"[GAME STARTED] New Game started with ID = {game_id}"
-                            networking.send_message(message_response, client_socket, Server.HEADER)
-                            print(f"[RESPONSE TO CLIENT] {message_response}")
+                            # print(f"[RESPONSE TO CLIENT] {message_response}")
 
                     # If no data received or if the disconnect message is received from the client close the connection
                     if not data_message or data_message == '!DISCONNECT':
