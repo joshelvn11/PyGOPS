@@ -37,6 +37,14 @@ class Game:
         self.game_id = self.game_id.upper()
         return self.game_id
 
+    def list_cards(self, cards_dict):
+        cards_list = ""
+
+        for index, card in enumerate(cards_dict):
+            cards_list += f"{index + 1}: [{card}], "
+
+        return cards_list
+
     # Adds the requested player to the game
     def add_player(self, player):
 
@@ -75,10 +83,12 @@ class Game:
 
         # Reset all game variables
         self.player_points = [0, 0]
-        self.player_one_cards = {'A♠': 1, '2♠': 2, '3♠': 3, '4♠': 4, '5♠': 5, '6♠': 6, '7♠': 7, '8♠': 8, '9♠': 9,
-                                 '10♠': 10, 'J♠': 11, 'Q♠': 12, 'K♠': 13}
-        self.player_two_cards = {'A♣': 1, '2♣': 2, '3♣': 3, '4♣': 4, '5♣': 5, '6♣': 6, '7♣': 7, '8♣': 8, '9♣': 9,
-                                 '10♣': 10, 'J♣': 11, 'Q♣': 12, 'K♣': 13}
+        self.player_cards = [
+            {'A♠': 1, '2♠': 2, '3♠': 3, '4♠': 4, '5♠': 5, '6♠': 6, '7♠': 7, '8♠': 8, '9♠': 9,
+             '10♠': 10, 'J♠': 11, 'Q♠': 12, 'K♠': 13},
+            {'A♣': 1, '2♣': 2, '3♣': 3, '4♣': 4, '5♣': 5, '6♣': 6, '7♣': 7, '8♣': 8, '9♣': 9,
+             '10♣': 10, 'J♣': 11, 'Q♣': 12, 'K♣': 13}
+        ]
         self.game_cards = {'A♦': 1, '2♦': 2, '3♦': 3, '4♦': 4, '5♦': 5, '6♦': 6, '7♦': 7, '8♦': 8, '9♦': 9, '10♦': 10,
                            'J♦': 11, 'Q♦': 12, 'K♦': 13}
         self.play_stack = []
@@ -92,20 +102,27 @@ class Game:
             for player in self.players:
                 networking.send_message(f"START-GAME~Game is starting...", player.get_socket(), 64)
         except Exception as e:
-            print(f"[ERROR] Error in start_game() in game.py start game broadcast: {e}")
+            print(f"[ERROR] Error in start_game() in game.py start game broadcast")
+            print(f"[ERROR INFO {e}")
 
         self.start_round()
 
     def start_round(self):
 
+        print(f"[LOG] Round in game {self.game_id} is starting")
+
         # Add the stop card from the game cards list to the play stack and remove it from the list
         self.play_stack = self.game_cards_list[-1]
         self.game_cards_list.pop()
 
-        # Send both players the current card in play
-        for player in self.players:
-            networking.send_message(f"INFO~Current card: {self.play_stack}", player.get_socket, 64)
-            networking.send_message(f"INFO~Your cards: {self.play_stack}", player.get_socket, 64)
+        # Send both players the current card in play and their hand / cards
+        for index, player in enumerate(self.players):
+            networking.send_message(f"INFO~{self.players[0].get_username()}'s Points: {self.player_points[0]}, "
+                                    f"{self.players[1].get_username()}'s Points: {self.player_points[1]}",
+                                    player.get_socket(), 64)
+            networking.send_message(f"INFO~Current card: {self.play_stack}", player.get_socket(), 64)
+            networking.send_message(f"INFO~Your cards: {self.list_cards(self.player_cards[index])}",
+                                    player.get_socket(), 64)
 
 
 
