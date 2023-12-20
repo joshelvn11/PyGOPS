@@ -18,7 +18,7 @@ class Server:
 
     # Define constants
     SERVER_ADDR = 'localhost'
-    PORT = 5071
+    PORT = 5073
     ADDR = (SERVER_ADDR, PORT)
     HEADER = 64
     FORMAT = 'utf-8'
@@ -158,7 +158,8 @@ class Server:
                         # Respond to the client that the game has started
                         message_response = f"INFO~[GAME STARTED] New Game started with ID: {game_id}"
                         networking.send_message(message_response, client_socket, Server.HEADER)
-                        # print(f"[RESPONSE TO CLIENT] {message_response}")
+                        message_response = f"INFO~Waiting for another player to join"
+                        networking.send_message(message_response, client_socket, Server.HEADER)
 
                     elif message_command == 'JOIN-GAME':
 

@@ -84,7 +84,7 @@ client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # Connect to the server
 # server_ip = input('Please enter the server IP you would like to connect to: ')
 # server_port = input('Please enter the port to connect with')
-server_address = ('localhost', 5071)
+server_address = ('localhost', 5073)
 client_socket.connect(server_address)
 
 # Send the clients username to the server
@@ -97,7 +97,7 @@ receive_response()
 
 
 # Start game procedure
-def start_game_procedure():
+def create_join_game_procedure():
     # Ask if the client would like to create a game or connect to an existing game
     start_game = input("Would you like to [1] create a game [2] connect to a game: ")
 
@@ -123,14 +123,49 @@ def start_game_procedure():
             print(response_body)
         elif response_command == 'FALSE':
             print(response_body)
-            start_game_procedure()
+            create_join_game_procedure()
 
     else:
         print("Please enter a valid option.")
-        start_game_procedure()
+        create_join_game_procedure()
 
 
-start_game_procedure()
+create_join_game_procedure()
+
+
+def game_play_procedure():
+
+    game_in_play = True
+
+    while game_in_play:
+
+        response_command, response_body = receive_response()
+
+        if response_command == "YOUR-TURN":
+            input(f"{response_body}: ")
+
+        elif response_command == "END-GAME":
+            pass
+
+        elif response_command == "CLOSE-GAME":
+            pass
+
+        # Continue to the next iteration of the loop and listen for another message if it is an info message
+        elif response_command == 'INFO':
+            continue
+
+
+# Wait to receive the start game command
+while True:
+
+    response_command, response_body = receive_response()
+
+    if response_command == "START-GAME":
+        print(response_body)
+        break
+
+# Start the game_play procedure
+game_play_procedure()
 
 
 # Start a thread to receive messages from the server
