@@ -6,21 +6,22 @@ import server
 
 class Game:
 
-    def __init__(self, server_instance, initial_client):
+    def __init__(self, server_instance, initial_player):
         self.server_instance = server_instance
         self.game_id = ""
-        # 2D List to hold player lists
-        self.players = [initial_client]
+
+        # List to hold player objects
+        self.players = [initial_player]
+
         # List to hold player points
         self.player_points = [0, 0]
+
         # Variable to hold the current player (by index)
         self.current_player = 0
-        # Dictionary of player one's cards
-        self.player_one_cards = {'A♠': 1, '2♠': 2, '3♠': 3, '4♠': 4, '5♠': 5, '6♠': 6, '7♠': 7, '8♠': 8, '9♠': 9,
-                                 '10♠': 10, 'J♠': 11, 'Q♠': 12, 'K♠': 13}
-        # Dictionary of player two's cards
-        self.player_two_cards = {'A♣': 1, '2♣': 2, '3♣': 3, '4♣': 4, '5♣': 5, '6♣': 6, '7♣': 7, '8♣': 8, '9♣': 9,
-                                 '10♣': 10, 'J♣': 11, 'Q♣': 12, 'K♣': 13}
+
+        # List to hold dictionaries of player's cards
+        self.player_cards = []
+
         # Dictionary of game cards
         self.game_cards = {'A♦': 1, '2♦': 2, '3♦': 3, '4♦': 4, '5♦': 5, '6♦': 6, '7♦': 7, '8♦': 8, '9♦': 9, '10♦': 10,
                            'J♦': 11, 'Q♦': 12, 'K♦': 13}
@@ -47,11 +48,11 @@ class Game:
 
                 # Let the player know they joined the game successfully
                 networking.send_message(f"TRUE~[JOINED GAME] Joined game {self.game_id}",
-                                        self.players[1][0], 64)
+                                        player.get_socket(), 64)
 
                 # Let the creator know a new player joined the game
-                networking.send_message(f"INFO~[NEW PLAYER] {self.players[0][2]} joined the game!",
-                                        self.players[0][0], 64)
+                networking.send_message(f"INFO~[NEW PLAYER] {player.get_username()} joined the game!",
+                                        self.players[0].get_socket(), 64)
 
                 print(f"[STARTING GAME] Starting game with ID: {self.game_id}")
 
@@ -64,7 +65,7 @@ class Game:
         elif len(self.players) >= 2:
             # Let the player know they could not join the game
             networking.send_message(f"FALSE~[COULD NOT JOIN] There are already two players in {self.game_id}",
-                                    player[0], 64)
+                                    player.get_username(), 64)
         elif len(self.players) == 0:
             pass
 
@@ -89,9 +90,11 @@ class Game:
             # Let players know the game is starting
             # Send both players the current card in play
             for player in self.players:
-                networking.send_message(f"START-GAME~Game is starting...", player[0], 64)
+                networking.send_message(f"START-GAME~Game is starting...", player.get_socket(), 64)
         except Exception as e:
             print(f"[ERROR] Error in start_game() in game.py start game broadcast: {e}")
+
+        self.start_round()
 
     def start_round(self):
 
@@ -101,7 +104,9 @@ class Game:
 
         # Send both players the current card in play
         for player in self.players:
-            networking.send_message(f"INFO~Current card: {self.play_stack}", player[0], 64)
+            networking.send_message(f"INFO~Current card: {self.play_stack}", player.get_socket, 64)
+            networking.send_message(f"INFO~Your cards: {self.play_stack}", player.get_socket, 64)
+
 
 
 
