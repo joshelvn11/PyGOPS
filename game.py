@@ -37,11 +37,18 @@ class Game:
         self.game_id = self.game_id.upper()
         return self.game_id
 
-    def list_cards(self, cards_dict):
+    def list_cards(self, cards_coll):
         cards_list = ""
 
-        for index, card in enumerate(cards_dict):
-            cards_list += f"{index + 1}: [{card}], "
+        # If the cards collection passed is a dictionary
+        if isinstance(cards_coll, dict):
+            for index, card in enumerate(cards_coll):
+                cards_list += f"{index + 1}: [{card}], "
+
+        # If the cards collection passed in a list
+        elif isinstance(cards_coll, list):
+            for card in cards_coll:
+                cards_list += f"[{card}] "
 
         return cards_list
 
@@ -57,6 +64,10 @@ class Game:
                 # Let the player know they joined the game successfully
                 networking.send_message(f"TRUE~[JOINED GAME] Joined game {self.game_id}",
                                         player.get_socket(), 64)
+
+                # Set the game ID on the client site
+                message_response = f"SET-ID~{self.game_id}"
+                networking.send_message(message_response, player.get_socket(), 64)
 
                 # Let the creator know a new player joined the game
                 networking.send_message(f"INFO~[NEW PLAYER] {player.get_username()} joined the game!",
@@ -120,9 +131,16 @@ class Game:
             networking.send_message(f"INFO~{self.players[0].get_username()}'s Points: {self.player_points[0]}, "
                                     f"{self.players[1].get_username()}'s Points: {self.player_points[1]}",
                                     player.get_socket(), 64)
-            networking.send_message(f"INFO~Current card: {self.play_stack}", player.get_socket(), 64)
+            networking.send_message(f"INFO~Current card: [{self.list_cards(self.play_stack)}]", player.get_socket(), 64)
             networking.send_message(f"INFO~Your cards: {self.list_cards(self.player_cards[index])}",
                                     player.get_socket(), 64)
+
+        # Ask each player to play their turn
+        for player in self.players:
+            networking.send_message(f"YOUR-TURN~Your turn (pick the card number you wish to play): [{self.play_stack}]",
+                                    player.get_socket(), 64)
+
+
 
 
 

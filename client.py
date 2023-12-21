@@ -5,6 +5,7 @@ import pickle
 HEADER = 64
 FORMAT = 'utf-8'
 
+game_id = ""
 
 # Function to continually listen for messages
 def receive_messages():
@@ -108,8 +109,18 @@ def create_join_game_procedure():
         # Wait for response that server has received start new game command
         receive_response()
 
-        # Wait for response that new game has been started and the game ID
+        # Wait for response that new game has been started
         receive_response()
+
+        # Wait for the game ID and set the global game ID
+        receive_response()
+        response_command, response_body = receive_response()
+        if response_command == 'SET-ID':
+            global game_id
+            game_id = response_body
+        else:
+            print("[ERROR] Invalid response from server, expected game ID")
+
 
     elif start_game == '2':
         game_id = input("Please enter the ID of the game you wish to join: ")
@@ -121,6 +132,16 @@ def create_join_game_procedure():
 
         if response_command == 'TRUE':
             print(response_body)
+
+            # Wait for the game ID and set the global game ID
+            receive_response()
+            response_command, response_body = receive_response()
+            if response_command == 'SET-ID':
+                global game_id
+                game_id = response_body
+            else:
+                print("[ERROR] Invalid response from server, expected game ID")
+
         elif response_command == 'FALSE':
             print(response_body)
             create_join_game_procedure()
@@ -142,7 +163,7 @@ def game_play_procedure():
         response_command, response_body = receive_response()
 
         if response_command == "YOUR-TURN":
-            input(f"{response_body}: ")
+            input(response_body)
 
         elif response_command == "END-GAME":
             pass

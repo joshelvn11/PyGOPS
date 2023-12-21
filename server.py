@@ -155,6 +155,10 @@ class Server:
                         game_id = game_instance.generate_id()
                         print(f"[NEW GAME] New game started with ID [{game_id}] by {player.get_username()}")
 
+                        # Set the game ID on the client site
+                        message_response = f"SET-ID~{game_id}"
+                        networking.send_message(message_response, player.get_socket(), Server.HEADER)
+
                         # Add the game instance to class dictionary with the ID as the key
                         Server.games[game_id] = game_instance
 
