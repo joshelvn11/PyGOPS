@@ -153,11 +153,7 @@ class Server:
                         # Create new game instance and generate a new game ID for the instance
                         game_instance = game.Game(self, player)
                         game_id = game_instance.generate_id()
-                        print(f"[NEW GAME] New game started with ID [{game_id}] by {player.get_username()}")
-
-                        # Set the game ID on the client site
-                        message_response = f"SET-ID~{game_id}"
-                        networking.send_message(message_response, player.get_socket(), Server.HEADER)
+                        print(f"[LOG] New game started with ID [{game_id}] by {player.get_username()}")
 
                         # Add the game instance to class dictionary with the ID as the key
                         Server.games[game_id] = game_instance
@@ -165,6 +161,10 @@ class Server:
                         # Respond to the client that the game has started
                         message_response = f"INFO~[GAME STARTED] New Game started with ID: {game_id}"
                         networking.send_message(message_response, player.get_socket(), Server.HEADER)
+                        # Set the game ID on the client site
+                        message_response = f"SET-ID~{game_id}"
+                        networking.send_message(message_response, player.get_socket(), Server.HEADER)
+
                         message_response = f"INFO~Waiting for another player to join"
                         networking.send_message(message_response, player.get_socket(), Server.HEADER)
 

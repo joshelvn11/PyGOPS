@@ -99,6 +99,9 @@ receive_response()
 
 # Start game procedure
 def create_join_game_procedure():
+
+    global game_id
+
     # Ask if the client would like to create a game or connect to an existing game
     start_game = input("Would you like to [1] create a game [2] connect to a game: ")
 
@@ -113,18 +116,17 @@ def create_join_game_procedure():
         receive_response()
 
         # Wait for the game ID and set the global game ID
-        receive_response()
         response_command, response_body = receive_response()
         if response_command == 'SET-ID':
-            global game_id
             game_id = response_body
         else:
             print("[ERROR] Invalid response from server, expected game ID")
+            print(f"[ERROR INFO] Response received: '{response_command, response_body}'")
 
 
     elif start_game == '2':
-        game_id = input("Please enter the ID of the game you wish to join: ")
-        message = f"JOIN-GAME~{game_id}"
+        input_game_id = input("Please enter the ID of the game you wish to join: ")
+        message = f"JOIN-GAME~{input_game_id}"
         send_message(message)
 
         # Wait for response if joining the game was successful
@@ -134,14 +136,11 @@ def create_join_game_procedure():
             print(response_body)
 
             # Wait for the game ID and set the global game ID
-            receive_response()
             response_command, response_body = receive_response()
             if response_command == 'SET-ID':
-                global game_id
                 game_id = response_body
             else:
                 print("[ERROR] Invalid response from server, expected game ID")
-
         elif response_command == 'FALSE':
             print(response_body)
             create_join_game_procedure()
