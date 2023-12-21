@@ -50,6 +50,9 @@ class Game:
             for card in cards_coll:
                 cards_list += f"[{card}] "
 
+        else:
+            print(f"[ERROR] Invalid type passed to list_cards(), type passes is {type(cards_coll)}")
+
         return cards_list
 
     # Adds the requested player to the game
@@ -123,7 +126,7 @@ class Game:
         print(f"[LOG] Round in game {self.game_id} is starting")
 
         # Add the stop card from the game cards list to the play stack and remove it from the list
-        self.play_stack = self.game_cards_list[-1]
+        self.play_stack.append(self.game_cards_list[-1])
         self.game_cards_list.pop()
 
         # Send both players the current card in play and their hand / cards
@@ -131,13 +134,13 @@ class Game:
             networking.send_message(f"INFO~{self.players[0].get_username()}'s Points: {self.player_points[0]}, "
                                     f"{self.players[1].get_username()}'s Points: {self.player_points[1]}",
                                     player.get_socket(), 64)
-            networking.send_message(f"INFO~Current card: [{self.list_cards(self.play_stack)}]", player.get_socket(), 64)
+            networking.send_message(f"INFO~Current card: {self.list_cards(self.play_stack)}", player.get_socket(), 64)
             networking.send_message(f"INFO~Your cards: {self.list_cards(self.player_cards[index])}",
                                     player.get_socket(), 64)
 
         # Ask each player to play their turn
         for player in self.players:
-            networking.send_message(f"YOUR-TURN~Your turn (pick the card number you wish to play): [{self.play_stack}]",
+            networking.send_message(f"YOUR-TURN~Your turn (pick the card number you wish to play): ",
                                     player.get_socket(), 64)
 
 
