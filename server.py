@@ -136,6 +136,7 @@ class Server:
                     message_body = data_message.split('~')[1]
 
                     # Process the command and message
+
                     if message_command == 'SET-USERNAME':
                         player.set_username(message_body)
                         message_response = (f"INFO~[SUCCESS] Username set to '{player.get_username()}'"
@@ -178,6 +179,14 @@ class Server:
                             message_response = f"FALSE~[COULD NOT JOIN] Game does does not exist"
                             networking.send_message(message_response, player.get_socket(), Server.HEADER)
                             # print(f"[RESPONSE TO CLIENT] {message_response}")
+
+                    elif message_command == 'PLAY-TURN':
+                        # Split the game id and message from the message body
+                        message_game_id = message_body.split("$")[0]
+                        message_body = message_body.split("$")[1]
+
+                        # Send the play to the specified game instance as well as the player object that played the turn
+                        Server.games[message_game_id].play_turn(message_body, player)
 
                     # If no data received or if the disconnect message is received from the client close the connection
                     if not data_message or data_message == '!DISCONNECT':

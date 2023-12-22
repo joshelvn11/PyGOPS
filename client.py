@@ -40,6 +40,8 @@ def receive_response():
         # Blocking code - will not pass this line until data is received
         data_message = client_socket.recv(data_length).decode(FORMAT)
 
+        # print(f"[MSG] {data_message}")
+
         # Split the string into the command and message content
         message_command = data_message.split('~')[0]
         message_body = data_message.split('~')[1]
@@ -123,7 +125,6 @@ def create_join_game_procedure():
             print("[ERROR] Invalid response from server, expected game ID")
             print(f"[ERROR INFO] Response received: '{response_command, response_body}'")
 
-
     elif start_game == '2':
         input_game_id = input("Please enter the ID of the game you wish to join: ")
         message = f"JOIN-GAME~{input_game_id}"
@@ -162,7 +163,9 @@ def game_play_procedure():
         response_command, response_body = receive_response()
 
         if response_command == "YOUR-TURN":
-            input(response_body)
+            message = input(response_body)
+            message = f"PLAY-TURN~{game_id}${message}"
+            send_message(message)
 
         elif response_command == "END-GAME":
             pass

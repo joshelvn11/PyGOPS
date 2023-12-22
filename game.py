@@ -10,14 +10,20 @@ class Game:
         self.server_instance = server_instance
         self.game_id = ""
 
+        # Int to hold the current round being played
+        self.current_round = 0
+
         # List to hold player objects
         self.players = [initial_player]
 
         # List to hold player points
         self.player_points = [0, 0]
 
-        # Variable to hold the current player (by index)
-        self.current_player = 0
+        # List to hold booleans if each player has made a move for the round
+        self.played_turn = [False, False]
+
+        # List to hold the player moves for the round
+        self.player_moves = [0, 0]
 
         # List to hold dictionaries of player's cards
         self.player_cards = []
@@ -36,6 +42,13 @@ class Game:
         self.game_id = ''.join(random.choice(characters) for _ in range(6))
         self.game_id = self.game_id.upper()
         return self.game_id
+
+    def inverse(self, number):
+
+        if number == 0:
+            return 1
+        elif number == 1:
+            return 0
 
     def list_cards(self, cards_coll):
         cards_list = ""
@@ -96,6 +109,7 @@ class Game:
         print(f"[LOG] Game {self.game_id} is starting")
 
         # Reset all game variables
+        self.current_round = 0
         self.player_points = [0, 0]
         self.player_cards = [
             {'A♠': 1, '2♠': 2, '3♠': 3, '4♠': 4, '5♠': 5, '6♠': 6, '7♠': 7, '8♠': 8, '9♠': 9,
@@ -125,6 +139,12 @@ class Game:
 
         print(f"[LOG] Round in game {self.game_id} is starting")
 
+        # Increment the round
+        self.current_round += 1
+
+        # Reset the played turn list
+        self.played_turn = [False, False]
+
         # Add the stop card from the game cards list to the play stack and remove it from the list
         self.play_stack.append(self.game_cards_list[-1])
         self.game_cards_list.pop()
@@ -140,12 +160,39 @@ class Game:
 
         # Ask each player to play their turn
         for player in self.players:
-            networking.send_message(f"YOUR-TURN~Your turn (pick the card number you wish to play): ",
+            networking.send_message("YOUR-TURN~Your turn (pick the card number you wish to play): ",
                                     player.get_socket(), 64)
 
+    def play_turn(self, card_played, player_played):
 
+        # Convert the card to an integer
+        try:
+            card_played = int(card_played)
+        except Exception as e:
+            print(f"[ERROR] Error in play_turn() in game.py start game broadcast")
+            print(f"[ERROR INFO {e}")
 
+        # Check the move is valid
+        if card_played > 13 or card_played < 1:
+            networking.send_message("YOUR-TURN~Invalid move, try again!", player_played.get_socket(), 64)
+            return
 
+        # Check which player made the move
+        for index, player in enumerate(self.players):
+            if player is player_played:
+
+                # Store the move
+                self.player_moves[index] = card_played
+
+                # Remove the card played from their hand
+                # self.player_cards[index].remove()
+
+                networking.send_message(f"INFO~Waiting for "
+                                        f"{self.players[self.inverse(index)].get_username()} to play...",
+                                        player.get_socket(), 64)
+
+                networking.send_message(f"INFO~{player.get_username()} made their move! Waiting on you...",
+                                        self.players[self.inverse(index)].get_socket(), 64)
 
 
 
