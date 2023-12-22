@@ -55,8 +55,8 @@ class Game:
 
         # If the cards collection passed is a dictionary
         if isinstance(cards_coll, dict):
-            for index, card in enumerate(cards_coll):
-                cards_list += f"{index + 1}: [{card}], "
+            for card_number, card in cards_coll.items():
+                cards_list += f"{card_number}: [{card}], "
 
         # If the cards collection passed in a list
         elif isinstance(cards_coll, list):
@@ -137,8 +137,6 @@ class Game:
 
     def start_round(self):
 
-        print(f"[LOG] Round in game {self.game_id} is starting")
-
         # Increment the round
         self.current_round += 1
 
@@ -174,25 +172,44 @@ class Game:
 
         # Check the move is valid
         if card_played > 13 or card_played < 1:
-            networking.send_message("YOUR-TURN~Invalid move, try again!", player_played.get_socket(), 64)
+            networking.send_message("YOUR-TURN~Invalid move, please enter a number from 1 to 13...",
+                                    player_played.get_socket(), 64)
             return
 
         # Check which player made the move
         for index, player in enumerate(self.players):
             if player is player_played:
 
+                # Check the player has the card available to play
+                if card_played not in self.player_cards[index]:
+                    networking.send_message("YOUR-TURN~Invalid move, you dont have that card, try again...",
+                                            player.get_socket(), 64)
+                    return
+
                 # Store the move
                 self.player_moves[index] = card_played
 
                 # Remove the card played from their hand
-                # self.player_cards[index].remove()
+                self.player_cards[index].pop(card_played)
 
-                networking.send_message(f"INFO~Waiting for "
-                                        f"{self.players[self.inverse(index)].get_username()} to play...",
-                                        player.get_socket(), 64)
+                # Check if the other player has played their move yet
+                if self.player_moves[self.inverse(index)] > 0:
+                    # Start the end turn procedure
+                    networking.send_message(f"INFO~Both of you have played, let's find out the scores...",
+                                            player.get_socket(), 64)
 
-                networking.send_message(f"INFO~{player.get_username()} made their move! Waiting on you...",
-                                        self.players[self.inverse(index)].get_socket(), 64)
+                    # Start the end round procedure
+                    self.end_round()
+
+                else:
+                    # Let the current player know they are waiting on the other player
+                    networking.send_message(f"INFO~Waiting for "
+                                            f"{self.players[self.inverse(index)].get_username()} to play...",
+                                            player.get_socket(), 64)
+
+    def end_round(self):
+        pass
+
 
 
 
