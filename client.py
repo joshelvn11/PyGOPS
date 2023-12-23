@@ -6,6 +6,8 @@ import pickle
 HEADER = 64
 FORMAT = 'utf-8'
 
+server_ip = "127.0.0.1"
+server_port = 6969
 game_id = ""
 
 # Function to continually listen for messages
@@ -98,13 +100,24 @@ def print_slowly(text, new_line=True, delay=0.05):
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Connect to the server
-# server_ip = input('Please enter the server IP you would like to connect to: ')
-# server_port = input('Please enter the port to connect with')
-server_address = ('localhost', 5079)
+print_slowly('Enter server IP (leave blank for default): ', False)
+server_ip_input = input()
+if server_ip_input:
+    server_ip = server_ip_input
+
+print_slowly('Enter server port (leave blank for default): ', False)
+server_port_input = input()
+if server_port_input:
+    server_port = int(server_port_input)
+
+server_address = (server_ip, server_port)
 client_socket.connect(server_address)
 
+# Wait for successful connection response
+receive_response()
+
 # Send the clients username to the server
-print_slowly("Please choose a name to connect with: ", False)
+print_slowly("Please choose a name to play with: ", False)
 username = input()
 message = f"SET-USERNAME~{username}"
 send_message(message)

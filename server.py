@@ -19,7 +19,7 @@ class Server:
 
     # Define constants
     SERVER_ADDR = 'localhost'
-    PORT = 5079
+    PORT = 6969
     ADDR = (SERVER_ADDR, PORT)
     HEADER = 64
     FORMAT = 'utf-8'
@@ -96,12 +96,17 @@ class Server:
 
             # Create a client object and add it to the list of client objects
             player_instance = player.Player(client_socket)
+
             # Set default username
             player_instance.set_username(f"User: {len(Server.clients)}")
 
             # Create a new thread to handle the client
             client_thread = threading.Thread(target=self.handle_client, args=(player_instance,))
             client_thread.start()
+
+            # Let the client know they connected successfully
+            message_response = f"INFO~[SUCCESS] Successfully connected to this server!"
+            networking.send_message(message_response, player_instance.get_socket(), Server.HEADER)
 
             # List the active threads / connections
             print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 1}")
