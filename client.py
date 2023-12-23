@@ -1,4 +1,5 @@
 import socket
+import time
 import threading
 import pickle
 
@@ -48,7 +49,7 @@ def receive_response():
 
         # Print info message directly to the console
         if message_command == 'INFO':
-            print(message_body)
+            print_slowly(message_body)
 
         return message_command, message_body
 
@@ -81,6 +82,14 @@ def send_message(data_message):
     client_socket.send(data_message)
 
 
+def print_slowly(text, new_line=True, delay=0.05):
+    for char in text:
+        print(char, end='', flush=True)
+        time.sleep(delay)
+
+    if new_line:
+        print('')
+
 # Create a socket object
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -91,7 +100,8 @@ server_address = ('localhost', 5073)
 client_socket.connect(server_address)
 
 # Send the clients username to the server
-username = input("Please choose a name to connect with: ")
+print_slowly("Please choose a name to connect with: ", False)
+username = input()
 message = f"SET-USERNAME~{username}"
 send_message(message)
 
@@ -105,7 +115,8 @@ def create_join_game_procedure():
     global game_id
 
     # Ask if the client would like to create a game or connect to an existing game
-    start_game = input("Would you like to [1] create a game [2] connect to a game: ")
+    print_slowly("Would you like to [1] create a game [2] connect to a game: ", False)
+    start_game = input()
 
     if start_game == '1':
         message = f"START-GAME~{start_game}"
@@ -126,7 +137,8 @@ def create_join_game_procedure():
             print(f"[ERROR INFO] Response received: '{response_command, response_body}'")
 
     elif start_game == '2':
-        input_game_id = input("Please enter the ID of the game you wish to join: ")
+        print_slowly("Please enter the ID of the game you wish to join: ", False)
+        input_game_id = input()
         message = f"JOIN-GAME~{input_game_id}"
         send_message(message)
 
@@ -134,7 +146,7 @@ def create_join_game_procedure():
         response_command, response_body = receive_response()
 
         if response_command == 'TRUE':
-            print(response_body)
+            print_slowly(response_body)
 
             # Wait for the game ID and set the global game ID
             response_command, response_body = receive_response()
@@ -147,7 +159,7 @@ def create_join_game_procedure():
             create_join_game_procedure()
 
     else:
-        print("Please enter a valid option.")
+        print_slowly("Please enter a valid option.")
         create_join_game_procedure()
 
 
@@ -163,7 +175,8 @@ def game_play_procedure():
         response_command, response_body = receive_response()
 
         if response_command == "YOUR-TURN":
-            message = input(response_body)
+            print_slowly(response_body, False)
+            message = input()
             message = f"PLAY-TURN~{game_id}${message}"
             send_message(message)
 
