@@ -19,7 +19,7 @@ class Server:
 
     # Define constants
     SERVER_ADDR = 'localhost'
-    PORT = 5073
+    PORT = 5079
     ADDR = (SERVER_ADDR, PORT)
     HEADER = 64
     FORMAT = 'utf-8'

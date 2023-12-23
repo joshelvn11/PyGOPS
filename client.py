@@ -35,6 +35,10 @@ def receive_response():
         # Receive the header containing the message length and decode it using the UTF-8 format
         data_length = client_socket.recv(HEADER).decode(FORMAT)
         # Parse the value to an integer
+        # print(f"[HEADER] {data_length}")
+        if data_length == '':
+            data_length = 1024
+            print("[WARNING] Blank header received, setting message buffer to 1024 bytes")
         data_length = int(data_length)
 
         # Receive the message data from the server using the data length received from the header
@@ -96,7 +100,7 @@ client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # Connect to the server
 # server_ip = input('Please enter the server IP you would like to connect to: ')
 # server_port = input('Please enter the port to connect with')
-server_address = ('localhost', 5073)
+server_address = ('localhost', 5079)
 client_socket.connect(server_address)
 
 # Send the clients username to the server
@@ -192,13 +196,13 @@ def game_play_procedure():
 
 
 # Wait to receive the start game command
-while True:
-
-    response_command, response_body = receive_response()
-
-    if response_command == "START-GAME":
-        print(response_body)
-        break
+# while True:
+#
+#     response_command, response_body = receive_response()
+#
+#     if response_command == "START-GAME":
+#         print(response_body)
+#         break
 
 # Start the game_play procedure
 game_play_procedure()

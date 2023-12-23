@@ -140,10 +140,18 @@ class Game:
         # Increment the round
         self.current_round += 1
 
+        # Send the round number to the players
+        for player in self.players:
+            networking.send_message(f"INFO~\n\n---------- Round {self.current_round} ----------",
+                                    player.get_socket(), 64)
+
         # Reset the played turn list
         self.played_turn = [False, False]
 
-        # Add the stop card from the game cards list to the play stack and remove it from the list
+        # Reset the player moves
+        self.player_moves = [0, 0]
+
+        # Add the top card from the game cards list to the play stack and remove it from the list
         self.play_stack.append(self.game_cards_list[-1])
         self.game_cards_list.pop()
 
@@ -182,21 +190,19 @@ class Game:
 
                 # Check the player has the card available to play
                 if card_played not in self.player_cards[index]:
-                    networking.send_message("YOUR-TURN~Invalid move, you dont have that card, try again...",
+                    networking.send_message("YOUR-TURN~Invalid move, you dont have that card, try again: ",
                                             player.get_socket(), 64)
                     return
 
                 # Store the move
                 self.player_moves[index] = card_played
 
-                # Remove the card played from their hand
-                self.player_cards[index].pop(card_played)
-
                 # Check if the other player has played their move yet
                 if self.player_moves[self.inverse(index)] > 0:
-                    # Start the end turn procedure
-                    networking.send_message(f"INFO~Both of you have played, let's find out the scores...",
-                                            player.get_socket(), 64)
+
+                    for player in self.players:
+                        networking.send_message(f"INFO~Both of you have played, let's find out the "
+                                                f"scores...", player.get_socket(), 64)
 
                     # Start the end round procedure
                     self.end_round()
@@ -208,20 +214,61 @@ class Game:
                                             player.get_socket(), 64)
 
     def end_round(self):
+
+        # Determine winner
+        winner_index = None
+        winner_name = None
+
+        if self.player_moves[0] > self.player_moves[1]:
+            winner_index = 0
+            winner_name = self.players[0].get_username()
+
+            for card in self.play_stack:
+
+                # Add the cards in the play stack to the player's points
+                self.player_points[0] += self.game_cards[card]
+
+            # Reset the play stack
+            self.play_stack = []
+
+        elif self.player_moves[1] > self.player_moves[0]:
+            winner_index = 1
+            winner_name = self.players[1].get_username()
+
+            for card in self.play_stack:
+
+                # Add the cards in the play stack to the player's points
+                self.player_points[1] += self.game_cards[card]
+
+            # Reset the play stack
+            self.play_stack = []
+
+        elif self.player_moves[0] == self.player_moves[1]:
+            pass
+
+        for player in self.players:
+            networking.send_message(f"INFO~{self.players[0].get_username()} "
+                                    f"[{self.player_cards[0][self.player_moves[0]]}] : "
+                                    f"[{self.player_cards[1][self.player_moves[1]]}] {self.players[1].get_username()} ",
+                                    player.get_socket(), 64)
+
+            # Let players know the round winner or if it was a tie
+            if self.player_moves[0] == self.player_moves[1]:
+                networking.send_message(f"INFO~It's a tie!", player.get_socket(), 64)
+            else:
+                networking.send_message(f"INFO~{winner_name} wins this round!", player.get_socket(), 64)
+
+        # Remove the cards that were played from the players hands
+        self.player_cards[0].pop(self.player_moves[0])
+        self.player_cards[1].pop(self.player_moves[1])
+
+        # Check if there are any cards left to play
+        if len(self.player_cards[0]) > 0:
+            # If there are cards left in the hand play the next round
+            self.start_round()
+        else:
+            # If the hand is finished end the game
+            self.end_game()
+
+    def end_game(self):
         pass
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
