@@ -271,4 +271,22 @@ class Game:
             self.end_game()
 
     def end_game(self):
-        pass
+
+        for index, player in enumerate(self.players):
+
+            networking.send_message(f"INFO~\n\n---------- End of Game ----------",
+                                    player.get_socket(), 64)
+
+            networking.send_message(f"INFO~{self.players[0].get_username()}'s Points: {self.player_points[0]}, "
+                                    f"{self.players[1].get_username()}'s Points: {self.player_points[1]}",
+                                    player.get_socket(), 64)
+
+            if self.player_points[0] > self.player_points[1]:
+                networking.send_message(f"INFO~{self.players[0].get_username} wins the game!",
+                                        player.get_socket, 64)
+            elif self.player_points[0] < self.player_points[1]:
+                networking.send_message(f"INFO~{self.players[1].get_username} wins the game!",
+                                        player.get_socket, 64)
+            elif self.player_points[0] == self.player_points[1]:
+                networking.send_message(f"INFO~It's a tie!",
+                                        player.get_socket, 64)
