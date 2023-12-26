@@ -105,5 +105,16 @@ are sent to both clients as well as the end game command which prompts the clien
 procedure.
 
 
-
 ## Deployment
+Deploying the game is as simple as starting the server script. Additional set up may be required on a home network where
+port fort wording is required when wanting to play this game over the internet.
+
+I have currently deployed a server on a Linode instance which can be connected to on 109.74.202.18:6060. 
+The steps for deployment where:
+1. Create a new Linode instance
+2. Install the GitHub CLI
+3. Log into my GitHub account
+4. Clone the repo to the home directory of the server
+5. Edit the 'server.py' script to bind to the IP of the created instance
+6. Launch the server by running '$ python3 server.py' in the PyGOPS directory
+7. The server can now be connected to by cloning the GitHub repo onto any machine, running the client.py script and connecting to the address above.
