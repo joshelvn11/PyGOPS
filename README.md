@@ -1,0 +1,2 @@
+# PyGOPS
+PyGOPS is an implementation in Python of the card game 'Game of Pure Strategy'. It is a client server, terminal based implementation of the game allowing players to play with each other remotely.
