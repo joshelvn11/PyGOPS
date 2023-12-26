@@ -1,5 +1,6 @@
 import socket
 import time
+import networking
 import threading
 import pickle
 
@@ -67,30 +68,6 @@ def receive_response():
         print(f"[ERROR INFO] {e}")
 
 
-def send_message(data_message):
-
-    # Encode the message data
-    data_message = data_message.encode()
-
-    # Serialize the message object for sending
-    # data_message = pickle.dumps(data_message)
-
-    # Determine the message data length to create the message header
-    data_length = len(data_message)
-
-    # Encode the data length to send
-    data_length = str(data_length).encode()
-
-    # Pad the data length to make it 64 bytes
-    data_length += b' ' * (HEADER - len(data_length))
-
-    # Send the data length (header) to the server
-    client_socket.send(data_length)
-
-    # Send the message data to the server
-    client_socket.send(data_message)
-
-
 def print_slowly(text, new_line=True, delay=0.03):
     for char in text:
         print(char, end='', flush=True)
@@ -124,7 +101,7 @@ receive_response()
 print_slowly("Please choose a name to play with: ", False)
 username = input()
 message = f"SET-USERNAME~{username}"
-send_message(message)
+networking.send_message(message, client_socket, HEADER)
 
 # Wait for response that set username has been successful
 receive_response()
@@ -141,7 +118,7 @@ def create_join_game_procedure():
 
     if start_game == '1':
         message = f"START-GAME~{start_game}"
-        send_message(message)
+        networking.send_message(message, client_socket, HEADER)
 
         # Wait for response that server has received start new game command
         receive_response()
@@ -161,7 +138,7 @@ def create_join_game_procedure():
         print_slowly("Please enter the ID of the game you wish to join: ", False)
         input_game_id = input()
         message = f"JOIN-GAME~{input_game_id}"
-        send_message(message)
+        networking.send_message(message, client_socket, HEADER)
 
         # Wait for response if joining the game was successful
         response_command, response_body = receive_response()
@@ -199,7 +176,7 @@ def game_play_procedure():
             print_slowly(response_body, False)
             message = input()
             message = f"PLAY-TURN~{game_id}${message}"
-            send_message(message)
+            networking.send_message(message, client_socket,HEADER)
 
         elif response_command == "END-GAME":
             pass
