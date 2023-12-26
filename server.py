@@ -18,11 +18,11 @@ class Server:
     server_started = False
 
     # Define constants
-    SERVER_ADDR = 'localhost'
+    SERVER_ADDR = "localhost"
     PORT = 7001
     ADDR = (SERVER_ADDR, PORT)
     HEADER = 64
-    FORMAT = 'utf-8'
+    FORMAT = "utf-8"
 
     # List to store connected client objects
     clients = []
@@ -35,7 +35,7 @@ class Server:
         if cls._instance is None:
             cls._instance = super(Server, cls).__new__(cls)
             # Additional initialization code can be added here
-            print('Server initialized')
+            print("Server initialized")
             # Create a socket object
             cls.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -56,7 +56,7 @@ class Server:
     # Function to start the server
     def start_server(self):
 
-        print('Starting server...')
+        print("Starting server...")
 
         server_running = True
         server_thread = threading.Thread(target=self.server_worker)
@@ -65,7 +65,7 @@ class Server:
     # Function to shut down the server and close all sockets
     def stop_server(self):
 
-        print('Stopping server...')
+        print("Stopping server...")
 
         server_running = False
 
@@ -82,7 +82,7 @@ class Server:
     # starts threads to handle clients
     def server_worker(self):
 
-        print('Server started...')
+        print("Server started...")
 
         # Listen for incoming connections
         self.server_socket.listen()
@@ -109,7 +109,7 @@ class Server:
             networking.send_message(message_response, player_instance.get_socket(), Server.HEADER)
 
             # List the active threads / connections
-            print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 1}")
+            print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 2}")
 
     # Function to handle individual clients and listen for messages from each client
     def handle_client(self, player):
@@ -118,6 +118,7 @@ class Server:
 
         # Code will listen for data / messages from the client while they are connected
         while connected:
+
             try:
 
                 # Receive the header containing the message length and decode it using the UTF-8 format
@@ -141,15 +142,14 @@ class Server:
                     message_body = data_message.split('~')[1]
 
                     # Process the command and message
-
-                    if message_command == 'SET-USERNAME':
+                    if message_command == "SET-USERNAME":
                         player.set_username(message_body)
                         message_response = (f"INFO~[SUCCESS] Username set to '{player.get_username()}'"
                                             f" successfully")
                         networking.send_message(message_response, player.get_socket(), Server.HEADER)
                         # print(f"[RESPONSE TO CLIENT] {message_response}")
 
-                    elif message_command == 'START-GAME':
+                    elif message_command == "START-GAME":
 
                         print("[STARTING GAME]")
                         message_response = f"INFO~[STARTING NEW GAME]"
@@ -167,6 +167,7 @@ class Server:
                         # Respond to the client that the game has started
                         message_response = f"INFO~[GAME STARTED] New Game started with ID: {game_id}"
                         networking.send_message(message_response, player.get_socket(), Server.HEADER)
+
                         # Set the game ID on the client site
                         message_response = f"SET-ID~{game_id}"
                         networking.send_message(message_response, player.get_socket(), Server.HEADER)
@@ -174,8 +175,9 @@ class Server:
                         message_response = f"INFO~Waiting for another player to join"
                         networking.send_message(message_response, player.get_socket(), Server.HEADER)
 
-                    elif message_command == 'JOIN-GAME':
+                    elif message_command == "JOIN-GAME":
 
+                        # Check if the specified game instance exits
                         if message_body in Server.games:
                             # Pass the player over to the game instance to handle
                             Server.games[message_body].add_player(player)
@@ -183,9 +185,9 @@ class Server:
                             # Respond to the client that the game does not exist
                             message_response = f"FALSE~[COULD NOT JOIN] Game does does not exist"
                             networking.send_message(message_response, player.get_socket(), Server.HEADER)
-                            # print(f"[RESPONSE TO CLIENT] {message_response}")
 
-                    elif message_command == 'PLAY-TURN':
+                    elif message_command == "PLAY-TURN":
+
                         # Split the game id and message from the message body
                         message_game_id = message_body.split("$")[0]
                         message_body = message_body.split("$")[1]
@@ -197,31 +199,28 @@ class Server:
                     if not data_message or data_message == '!DISCONNECT':
                         connected = False
 
-                    # Broadcast the message to all clients
-                    # networking.broadcast(data_message, client_socket, clients, HEADER)
-
             except Exception as e:
                 print(f"[ERROR] Error in handle_client() in server.py")
                 print(f"[ERROR INFO] {e}")
                 break
 
         # Remove the client from the list and close the connection
-        # self.clients.remove(player)
+        self.clients.remove(player)
         player.close_socket()
 
 
 # APPLICATION LOGIC ----------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
     # Create an instance of the Server class
-    print('Creating server instance')
+    print("Creating server instance")
     server_instance = Server()
 
     # Start the server
-    print('Starting the server')
+    print("Starting the server")
     server_instance.start_server()
 
     while True:
-        command = input('$: ')
+        command = input("$: ")
 
         if command == 'server-start':
             server_instance.start_server()
