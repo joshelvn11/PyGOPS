@@ -3,12 +3,15 @@ import time
 import threading
 import pickle
 
+# Define Constants
 HEADER = 64
-FORMAT = 'utf-8'
+FORMAT = "utf-8"
+SERVER_ADDR = "127.0.0.1"
+SERVER_PORT = 7001
 
-server_ip = "127.0.0.1"
-server_port = 6969
+# Define global variables
 game_id = ""
+
 
 # Function to continually listen for messages
 def receive_messages():
@@ -88,13 +91,14 @@ def send_message(data_message):
     client_socket.send(data_message)
 
 
-def print_slowly(text, new_line=True, delay=0.05):
+def print_slowly(text, new_line=True, delay=0.03):
     for char in text:
         print(char, end='', flush=True)
         time.sleep(delay)
 
     if new_line:
         print('')
+
 
 # Create a socket object
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -103,14 +107,14 @@ client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 print_slowly('Enter server IP (leave blank for default): ', False)
 server_ip_input = input()
 if server_ip_input:
-    server_ip = server_ip_input
+    SERVER_ADDR = server_ip_input
 
 print_slowly('Enter server port (leave blank for default): ', False)
 server_port_input = input()
 if server_port_input:
-    server_port = int(server_port_input)
+    SERVER_PORT = int(server_port_input)
 
-server_address = (server_ip, server_port)
+server_address = (SERVER_ADDR, SERVER_PORT)
 client_socket.connect(server_address)
 
 # Wait for successful connection response
@@ -208,19 +212,5 @@ def game_play_procedure():
             continue
 
 
-# Wait to receive the start game command
-# while True:
-#
-#     response_command, response_body = receive_response()
-#
-#     if response_command == "START-GAME":
-#         print(response_body)
-#         break
-
-# Start the game_play procedure
 game_play_procedure()
 
-
-# Start a thread to receive messages from the server
-# receive_thread = threading.Thread(target=receive_messages)
-# receive_thread.start()

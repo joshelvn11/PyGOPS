@@ -1,7 +1,6 @@
 import random
 import string
 import networking
-import server
 
 
 class Game:
