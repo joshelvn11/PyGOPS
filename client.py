@@ -117,7 +117,7 @@ def create_join_game_procedure():
         networking.send_message(message_response, client_socket, HEADER)
 
         # Wait for response that server has received start new game command
-        receive_response()
+        #receive_response()
 
         # Wait for response that new game has been started
         receive_response()
@@ -187,7 +187,7 @@ def game_play_procedure():
             networking.send_message(message_response, client_socket, HEADER)
 
         elif response_command == "END-GAME":
-            pass
+            create_join_game_procedure()
 
         elif response_command == "CLOSE-GAME":
             pass

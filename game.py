@@ -204,7 +204,8 @@ class Game:
             networking.send_message(f"INFO~{self.players[0].get_username()}'s Points: {self.player_points[0]}, "
                                     f"{self.players[1].get_username()}'s Points: {self.player_points[1]}",
                                     player.get_socket(), 64)
-            networking.send_message(f"INFO~Current card: {self.list_cards(self.play_stack)}", player.get_socket(), 64)
+            networking.send_message(f"INFO~Current card: {self.list_cards(self.play_stack)}",
+                                    player.get_socket(), 64)
             networking.send_message(f"INFO~Your cards: {self.list_cards(self.player_cards[index])}",
                                     player.get_socket(), 64)
 
@@ -335,19 +336,24 @@ class Game:
         """
         for index, player in enumerate(self.players):
 
+            # Send banner
             networking.send_message(f"INFO~\n\n---------- End of Game ----------",
                                     player.get_socket(), 64)
 
+            # Send both players points for the game
             networking.send_message(f"INFO~{self.players[0].get_username()}'s Points: {self.player_points[0]}, "
                                     f"{self.players[1].get_username()}'s Points: {self.player_points[1]}",
                                     player.get_socket(), 64)
 
             if self.player_points[0] > self.player_points[1]:
-                networking.send_message(f"INFO~{self.players[0].get_username} wins the game!",
-                                        player.get_socket, 64)
+                networking.send_message(f"INFO~{self.players[0].get_username()} wins the game!",
+                                        player.get_socket(), 64)
             elif self.player_points[0] < self.player_points[1]:
-                networking.send_message(f"INFO~{self.players[1].get_username} wins the game!",
-                                        player.get_socket, 64)
+                networking.send_message(f"INFO~{self.players[1].get_username()} wins the game!",
+                                        player.get_socket(), 64)
             elif self.player_points[0] == self.player_points[1]:
                 networking.send_message(f"INFO~It's a tie!",
-                                        player.get_socket, 64)
+                                        player.get_socket(), 64)
+
+            networking.send_message("END-GAME~End of game", player.get_socket(), 64)
+
