@@ -19,8 +19,10 @@ def broadcast(data_message, sender_socket, clients, header):
 
             # Send the message data to the client
             client.send(data_message)
-        except:
+        except Exception as e:
             # If sending fails, remove the client from the list
+            print("[ERROR] error in broadcast in networking.py")
+            print(f"[ERROR INFO] {e}")
             clients.remove(client)
 
 
