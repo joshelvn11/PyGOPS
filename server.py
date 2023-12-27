@@ -41,6 +41,12 @@ class Server:
         self.server_running = None
 
     def __new__(cls, *args, **kwargs):
+        """
+        Create a new instance of the Server class.
+        This is a singleton meaning that if more than one instance is attempted
+        to be created it will return the already existing instance. This is to ensure
+        that only one instance of the server class ever exists
+        """
         if cls._instance is None:
             cls._instance = super(Server, cls).__new__(cls)
 
@@ -65,6 +71,10 @@ class Server:
 
     # Function to start the server
     def start_server(self):
+        """
+        Starts the server by setting the server running variable to True,
+        creating the server worker thread and starting it.
+        """
 
         print("Starting server...")
 
@@ -74,7 +84,10 @@ class Server:
 
     # Function to shut down the server and close all sockets
     def stop_server(self):
-
+        """
+        Method to stop the server from running by closing down all open
+        client sockets and the server socket.
+        """
         print("Stopping server...")
 
         # Close all client connections
@@ -97,9 +110,12 @@ class Server:
 
         print('Server stopped...')
 
-    # Server worker to be run as independent thread. Listens for connection requests and
-    # starts threads to handle clients
     def server_worker(self):
+        """
+        Main server thread which constantly listens for new connections from clients
+        and handles them appropriately by create a new player object for each new client
+        and starting a thread to handle the client and all incoming communications from them.
+        """
 
         print("Server started...")
 
@@ -144,8 +160,16 @@ class Server:
 
         print("Server listening stopped")
 
-    # Function to handle individual clients and listen for messages from each client
     def handle_client(self, player_instance):
+        """
+        Method run as thread in parallel to listen for all incoming communication from
+        the player instance passed a parameter. Receives all incoming messages by breaking
+        it down to its command and body and either dealing with the data correctly or passing
+        it to the appropriate function or module.
+
+        :param player_instance: The player object instance to listen to
+        :return:
+        """
 
         connected = True
 
@@ -167,9 +191,6 @@ class Server:
                     # Blocking code - will not pass this line until data is received
                     data_message = player_instance.get_socket().recv(data_length).decode(Server.FORMAT)
 
-                    # Print the message to the terminal
-                    # print(f"[{client_socket}] {data_message}")
-
                     # Split the string into the command and message content
                     message_command = data_message.split('~')[0]
                     message_body = data_message.split('~')[1]
@@ -180,14 +201,11 @@ class Server:
                         message_response = (f"INFO~[SUCCESS] Username set to '{player_instance.get_username()}'"
                                             f" successfully")
                         networking.send_message(message_response, player_instance.get_socket(), Server.HEADER)
-                        # print(f"[RESPONSE TO CLIENT] {message_response}")
 
                     elif message_command == "START-GAME":
 
                         print("[STARTING GAME]")
                         message_response = f"INFO~[STARTING NEW GAME]"
-                        networking.send_message(message_response, player_instance.get_socket(), Server.HEADER)
-                        # print(f"[RESPONSE TO CLIENT] {message_response}")
 
                         # Create new game instance and generate a new game ID for the instance
                         game_instance = game.Game(self, player_instance)
@@ -232,6 +250,7 @@ class Server:
                     # If no data received or if the disconnect message is received from the client close the connection
                     if not data_message or data_message == '!DISCONNECT':
                         connected = False
+
             except ConnectionAbortedError:
                 print(f"[INFO] Connection aborted by {player_instance.get_username()}")
                 connected = False
@@ -242,12 +261,16 @@ class Server:
                 connected = False
 
         # Remove the client from the list and close the connection
-        self.clients.remove(player_instance)
+        Server.clients.remove(player_instance)
         player_instance.close_socket()
 
 
 # APPLICATION LOGIC ----------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
+    """
+    Main entry point of the script
+    """
+
     # Create an instance of the Server class
     print("Creating server instance")
     server_instance = Server()
@@ -256,6 +279,7 @@ if __name__ == '__main__':
     print("Starting the server")
     server_instance.start_server()
 
+    # Loop to wait for commands from the user
     while True:
         command = input("$: ")
 

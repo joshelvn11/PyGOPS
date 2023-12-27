@@ -1,3 +1,8 @@
+"""
+Utility module for sending messages
+"""
+
+
 def broadcast(data_message, sender_socket, clients, header):
 
     # Encode the message data
@@ -29,6 +34,16 @@ def broadcast(data_message, sender_socket, clients, header):
 # Encodes, creates a header and sends the header and message content
 # to the specified recipient
 def send_message(data_message, socket_recipient, header):
+    """
+    Function to send messages to the specified recipient socket. The function
+    encodes the message, creates a header, send the header and finally sends
+    the message body
+    :param data_message: The message content
+    :param socket_recipient: The socket of the intended recipient
+    :param header: The desired length of the header
+    :return:
+    """
+
     # Encode the message data
     data_message = data_message.encode()
 

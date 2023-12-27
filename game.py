@@ -4,8 +4,18 @@ import networking
 
 
 class Game:
+    """
+    Class that creates a Game object. A game object is created by the server for every game
+    to handle the game state, the game logic and all game related communication with the
+    players.
+    """
 
     def __init__(self, server_instance, initial_player):
+        """
+        Initialises the game object
+        :param server_instance: The instance of the server that is creating this object
+        :param initial_player: The object instance of the player who requested to create the game
+        """
         self.server_instance = server_instance
         self.game_id = ""
 
@@ -35,8 +45,11 @@ class Game:
         # List to hold the game cards currently in play
         self.play_stack = []
 
-    # Generates a unique game and ID and returns it back to the server
     def generate_id(self):
+        """
+        Generates a six character game id.
+        :return: Returns the game id as a string
+        """
         characters = string.ascii_letters + string.digits
         self.game_id = ''.join(random.choice(characters) for _ in range(6))
         self.game_id = self.game_id.upper()
@@ -44,7 +57,12 @@ class Game:
 
     @staticmethod
     def inverse(number):
-
+        """
+        Inverse a number from 0 to 1 or 1 to 0. Used for easily getting the index
+        of the 'other' player throughout the script.
+        :param number: The number wanting to be inverted
+        :return: The inverse of the number passed
+        """
         if number == 0:
             return 1
         elif number == 1:
@@ -52,6 +70,13 @@ class Game:
 
     @staticmethod
     def list_cards(cards_coll):
+        """
+        Creates a string based list of the collection of cards passed to it. Can handle
+        collections in the form of a list or dictionary.
+        :param cards_coll: A list or dictionary of cards
+        :return: A string based list of the collection passed
+        """
+
         cards_list = ""
 
         # If the cards collection passed is a dictionary
@@ -65,12 +90,18 @@ class Game:
                 cards_list += f"[{card}] "
 
         else:
-            print(f"[ERROR] Invalid type passed to list_cards(), type passes is {type(cards_coll)}")
+            print(f"[ERROR] Invalid type passed to list_cards(), type passed is {type(cards_coll)}")
 
         return cards_list
 
-    # Adds the requested player to the game
     def add_player(self, player):
+        """
+        Function to add requested player instance to the game. Validates the game is not yet full
+        and if so adds the player and begins the game play procedure. If the game is full it lets
+        the player know
+        :param player: Instance of player object to be added to the game
+        :return:
+        """
 
         # Add player to the game and start the game procedure if there is currently only one player in the game
         if len(self.players) == 1:
@@ -98,6 +129,7 @@ class Game:
             except Exception as e:
                 print(f"[ERROR] Error in add_player() in game.py: {e}")
 
+        # If the game is already full
         elif len(self.players) >= 2:
             # Let the player know they could not join the game
             networking.send_message(f"FALSE~[COULD NOT JOIN] There are already two players in {self.game_id}",
@@ -106,6 +138,11 @@ class Game:
             pass
 
     def start_game(self):
+        """
+        Function to start a new game. Resets all game variables and initiates the method
+        to start the first round of play.
+        :return:
+        """
 
         print(f"[LOG] Game {self.game_id} is starting")
 
@@ -134,9 +171,15 @@ class Game:
             print(f"[ERROR] Error in start_game() in game.py start game broadcast")
             print(f"[ERROR INFO {e}")
 
+        # Start the first round
         self.start_round()
 
     def start_round(self):
+        """
+        Method to start each round. Resets round variables, sends both players round information
+        such as scores, current cards in play and their private hands.
+        :return:
+        """
 
         # Increment the round
         self.current_round += 1
@@ -171,6 +214,14 @@ class Game:
                                     player.get_socket(), 64)
 
     def play_turn(self, card_played, player_played):
+        """
+        When a PLAY-TURN message is sent to the server from a client, the main server thread
+        will pass message onto this method specifying the instance of the player you made the move.
+        This method then handles all subsequent logic for playing a turn.
+        :param card_played: The card (number) played by the player
+        :param player_played: The instance of the player who made the move
+        :return:
+        """
 
         # Convert the card to an integer
         try:
@@ -215,10 +266,17 @@ class Game:
                                             player.get_socket(), 64)
 
     def end_round(self):
+        """
+        When both players have played their turn for the round this method is called to
+        determine who the winner of the round is and handle all subsequent logic. It will
+        check if players have any cards left to play, if they do it will call the start round
+        method or if not will call the end game method.
+        :return:
+        """
 
-        # Determine winner
         winner_name = None
 
+        # Determine the winner of the round
         if self.player_moves[0] > self.player_moves[1]:
             winner_name = self.players[0].get_username()
 
@@ -242,8 +300,10 @@ class Game:
             self.play_stack = []
 
         elif self.player_moves[0] == self.player_moves[1]:
+            # If it's a tie there is no need to add points to a player or reset the play stack
             pass
 
+        # Send both player's moves to both players
         for player in self.players:
             networking.send_message(f"INFO~{self.players[0].get_username()} "
                                     f"[{self.player_cards[0][self.player_moves[0]]}] : "
@@ -269,7 +329,10 @@ class Game:
             self.end_game()
 
     def end_game(self):
-
+        """
+        Method to end the game. Simply sends both players the final score and the end game command
+        :return:
+        """
         for index, player in enumerate(self.players):
 
             networking.send_message(f"INFO~\n\n---------- End of Game ----------",
