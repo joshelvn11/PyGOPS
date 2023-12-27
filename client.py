@@ -116,9 +116,6 @@ def create_join_game_procedure():
         message_response = f"START-GAME~{start_game}"
         networking.send_message(message_response, client_socket, HEADER)
 
-        # Wait for response that server has received start new game command
-        #receive_response()
-
         # Wait for response that new game has been started
         receive_response()
 
