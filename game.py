@@ -42,14 +42,16 @@ class Game:
         self.game_id = self.game_id.upper()
         return self.game_id
 
-    def inverse(self, number):
+    @staticmethod
+    def inverse(number):
 
         if number == 0:
             return 1
         elif number == 1:
             return 0
 
-    def list_cards(self, cards_coll):
+    @staticmethod
+    def list_cards(cards_coll):
         cards_list = ""
 
         # If the cards collection passed is a dictionary
@@ -199,9 +201,9 @@ class Game:
                 # Check if the other player has played their move yet
                 if self.player_moves[self.inverse(index)] > 0:
 
-                    for player in self.players:
+                    for player_instance in self.players:
                         networking.send_message(f"INFO~Both of you have played, let's find out the "
-                                                f"scores...", player.get_socket(), 64)
+                                                f"scores...", player_instance.get_socket(), 64)
 
                     # Start the end round procedure
                     self.end_round()
@@ -215,11 +217,9 @@ class Game:
     def end_round(self):
 
         # Determine winner
-        winner_index = None
         winner_name = None
 
         if self.player_moves[0] > self.player_moves[1]:
-            winner_index = 0
             winner_name = self.players[0].get_username()
 
             for card in self.play_stack:
@@ -231,7 +231,6 @@ class Game:
             self.play_stack = []
 
         elif self.player_moves[1] > self.player_moves[0]:
-            winner_index = 1
             winner_name = self.players[1].get_username()
 
             for card in self.play_stack:
