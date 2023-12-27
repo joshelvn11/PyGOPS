@@ -24,6 +24,9 @@ class Server:
     HEADER = 64
     FORMAT = "utf-8"
 
+    # Sever variables
+    server_socket = None
+
     # List to store connected client objects
     clients = []
 
@@ -45,11 +48,10 @@ class Server:
             print("Server initialized")
 
             # Create a socket object
-            cls.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            Server.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
             # Bind the socket to a specific address and port
-            cls.server_address = (Server.SERVER_ADDR, Server.PORT)
-            cls.server_socket.bind(cls.server_address)
+            Server.server_socket.bind(Server.ADDR)
 
             # Variable to track the application state
             cls.application_running = True
@@ -88,10 +90,10 @@ class Server:
 
         self.server_running = False
 
-        print(f"Server socket {self.server_socket}")
+        print(f"Server socket {Server.server_socket}")
 
         # Close the server socket
-        self.server_socket.close()
+        Server.server_socket.close()
 
         print('Server stopped...')
 
@@ -102,15 +104,15 @@ class Server:
         print("Server started...")
 
         # Listen for incoming connections
-        self.server_socket.listen()
-        print(f"[SERVER STARTED] Listening on {self.server_address[0]}:{self.server_address[1]}")
+        Server.server_socket.listen()
+        print(f"[SERVER STARTED] Listening on {Server.ADDR[0]}:{Server.ADDR[1]}")
 
         while self.server_running:
 
             try:
                 # Accept a connection
                 # Get the client socket object and client address and assign to variables
-                client_socket, client_address = self.server_socket.accept()  # Blocking code
+                client_socket, client_address = Server.server_socket.accept()  # Blocking code
                 print(f"[NEW CONNECTION] New connection from {client_address}")
 
                 # Create a client object and add it to the list of client objects
