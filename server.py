@@ -240,7 +240,6 @@ class Server:
                 print(f"[ERROR] Error in handle_client() in server.py")
                 print(f"[ERROR INFO] {e}")
                 connected = False
-                break
 
         # Remove the client from the list and close the connection
         self.clients.remove(player_instance)
