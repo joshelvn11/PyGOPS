@@ -2,6 +2,9 @@
 PyGOPS is an implementation in Python of the card game 'Game of Pure Strategy'. It is a client server, terminal based 
 implementation of the game allowing players to play with each other remotely.
 
+The purpose of this project is to allow fans GOPS to play it online via terminal with their friends worldwide and also 
+allow them to create a server to host games for other fans.
+
 ## The Game and Rules
 The card game is played between two players. A standard deck of 52 cards is split into sets of the suits. One player 
 receives a hand consisting of all the Spaded, the other players receives a hand consisting of all the 
@@ -104,10 +107,25 @@ more cards left in the deck the end round procedure is started. In the end game 
 are sent to both clients as well as the end game command which prompts the clients to restart the start / join game
 procedure.
 
+Finally, at the end of the game the end
+
+## Testing
+
+### Data Validation Testing
+Data validation testing was carried out manually by entering invalid data into every input and ensuring
+it did not throw an error to the terminal.
+
+## Bugs
+
+### Existing Bugs
+There currently only one known existing bug that is located in the server shut down process where the server socket does
+not close properly when all clients do not disconnect on their machines causing the server not to be able to restart on
+the same address.
 
 ## Deployment
 Deploying the game is as simple as starting the server script. Additional set up may be required on a home network where
 port fort wording is required when wanting to play this game over the internet.
+
 
 I have currently deployed a server on a Linode instance which can be connected to on 109.74.202.18:6060. 
 The steps for deployment where:
