@@ -6,7 +6,7 @@ import networking
 HEADER = 64
 FORMAT = "utf-8"
 SERVER_ADDR = "127.0.0.1"
-SERVER_PORT = 7020
+SERVER_PORT = 6060
 
 # Define global variables
 game_id = ""
