@@ -19,7 +19,7 @@ class Server:
 
     # Define constants
     SERVER_ADDR = "localhost"
-    PORT = 6060
+    PORT = 6070
     ADDR = (SERVER_ADDR, PORT)
     HEADER = 64
     FORMAT = "utf-8"
@@ -148,14 +148,14 @@ class Server:
                 client_thread.start()
 
                 # Let the client know they connected successfully
-                message_response = f"INFO~[SUCCESS] Successfully connected to this server!"
+                message_response = "INFO~[SUCCESS] Successfully connected to this server!"
                 networking.send_message(message_response, player_instance.get_socket(), Server.HEADER)
 
                 # List the active threads / connections
                 print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 2}")
 
             except Exception as e:
-                print(f"[ERROR] Error in server_worker() in server.py")
+                print("[ERROR] Error in server_worker() in server.py")
                 print(f"[ERROR INFO] {e}")
 
         print("Server listening stopped")
@@ -224,7 +224,7 @@ class Server:
                         message_response = f"SET-ID~{game_instance_id}"
                         networking.send_message(message_response, player_instance.get_socket(), Server.HEADER)
 
-                        message_response = f"INFO~Waiting for another player to join"
+                        message_response = "INFO~Waiting for another player to join"
                         networking.send_message(message_response, player_instance.get_socket(), Server.HEADER)
 
                     elif message_command == "JOIN-GAME":
@@ -235,7 +235,7 @@ class Server:
                             Server.games[message_body].add_player(player_instance)
                         else:
                             # Respond to the client that the game does not exist
-                            message_response = f"FALSE~[COULD NOT JOIN] Game does does not exist"
+                            message_response = "FALSE~[COULD NOT JOIN] Game does does not exist"
                             networking.send_message(message_response, player_instance.get_socket(), Server.HEADER)
 
                     elif message_command == "PLAY-TURN":
@@ -256,7 +256,7 @@ class Server:
                 connected = False
 
             except Exception as e:
-                print(f"[ERROR] Error in handle_client() in server.py")
+                print("[ERROR] Error in handle_client() in server.py")
                 print(f"[ERROR INFO] {e}")
                 connected = False
 
@@ -266,9 +266,11 @@ class Server:
 
 
 # APPLICATION LOGIC ----------------------------------------------------------------------------------------------------
-if __name__ == '__main__':
+
+def start_server():
     """
-    Main entry point of the script
+    Method to start the server. Creates a server instance, start it then
+    listens for commands from the user.
     """
 
     # Create an instance of the Server class
@@ -306,3 +308,11 @@ if __name__ == '__main__':
                 print(f"[{game_id}]: {Server.games[game_id]}")
         else:
             print('Please enter a valid command')
+
+if __name__ == '__main__':
+    """
+    Main entry point of the script
+    """
+    start_server()
+
+    

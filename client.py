@@ -6,10 +6,11 @@ import networking
 HEADER = 64
 FORMAT = "utf-8"
 SERVER_ADDR = "127.0.0.1"
-SERVER_PORT = 6060
+SERVER_PORT = 6070
 
 # Define global variables
 game_id = ""
+client_socket = None
 
 
 def receive_response():
@@ -63,36 +64,6 @@ def print_slowly(text, new_line=True, delay=0.03):
 
     if new_line:
         print('')
-
-
-# Create a socket object
-client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-# Connect to the server
-print_slowly('Enter server IP (leave blank for default): ', False)
-server_ip_input = input()
-if server_ip_input:
-    SERVER_ADDR = server_ip_input
-
-print_slowly('Enter server port (leave blank for default): ', False)
-server_port_input = input()
-if server_port_input:
-    SERVER_PORT = int(server_port_input)
-
-server_address = (SERVER_ADDR, SERVER_PORT)
-client_socket.connect(server_address)
-
-# Wait for successful connection response
-receive_response()
-
-# Send the clients username to the server
-print_slowly("Please choose a name to play with: ", False)
-username = input()
-message = f"SET-USERNAME~{username}"
-networking.send_message(message, client_socket, HEADER)
-
-# Wait for response that set username has been successful
-receive_response()
 
 
 def create_join_game_procedure():
@@ -158,10 +129,6 @@ def create_join_game_procedure():
         create_join_game_procedure()
 
 
-# Start the create / join game procedure
-create_join_game_procedure()
-
-
 def game_play_procedure():
     """
     The actual procedure for playing the game. This function will continuously listen for a
@@ -194,5 +161,49 @@ def game_play_procedure():
             continue
 
 
-# Start the game play procedure
-game_play_procedure()
+
+def start_client():
+    """
+    Method to start the client. Creates and sets all necessary variables and
+    handles the intial procedure to get the game set up.
+    """
+
+    global SERVER_ADDR, SERVER_PORT, client_socket
+
+    # Create a socket object
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    # Connect to the server
+    print_slowly('Enter server IP (leave blank for default): ', False)
+    server_ip_input = input()
+    if server_ip_input:
+        SERVER_ADDR = server_ip_input
+
+    print_slowly('Enter server port (leave blank for default): ', False)
+    server_port_input = input()
+    if server_port_input:
+        SERVER_PORT = int(server_port_input)
+
+    server_address = (SERVER_ADDR, SERVER_PORT)
+    client_socket.connect(server_address)
+
+    # Wait for successful connection response
+    receive_response()
+
+    # Send the clients username to the server
+    print_slowly("Please choose a name to play with: ", False)
+    username = input()
+    message = f"SET-USERNAME~{username}"
+    networking.send_message(message, client_socket, HEADER)
+
+    # Wait for response that set username has been successful
+    receive_response()
+
+    # Start the create / join game procedure
+    create_join_game_procedure()
+
+    # Start the game play procedure
+    game_play_procedure()
+
+if __name__ == '__main__':
+    start_client()
