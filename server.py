@@ -17,8 +17,12 @@ class Server:
     _instance = None
     server_started = False
 
+    # Get the IP address of the current machine
+    hostname = socket.gethostname()
+    IPAddr = socket.gethostbyname(hostname)
+
     # Define constants
-    SERVER_ADDR = "localhost"
+    SERVER_ADDR = IPAddr
     PORT = 6070
     ADDR = (SERVER_ADDR, PORT)
     HEADER = 64
