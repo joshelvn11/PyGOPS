@@ -57,11 +57,25 @@ class Server:
             # Additional initialization code can be added here
             print("Server initialized")
 
+
+            # Let the user set the Port number
+            try:
+                # Ask the user which port they would like to run the server on
+                server_port = input("What port number would you like to start the server on: ")
+
+                Server.PORT = int(server_port)
+
+            except Exception as e:
+                print("[ERROR] Error in setting server port")
+                print(f"[ERROR INFO] {e}")
+            else:
+                print(f"[INFO] Server port successfully set to {Server.PORT}")
+
             # Create a socket object
             Server.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
             # Bind the socket to a specific address and port
-            Server.server_socket.bind(Server.ADDR)
+            Server.server_socket.bind((Server.SERVER_ADDR, Server.PORT))
 
             # Variable to track the application state
             cls.application_running = True
@@ -125,7 +139,7 @@ class Server:
 
         # Listen for incoming connections
         Server.server_socket.listen()
-        print(f"[SERVER STARTED] Listening on {Server.ADDR[0]}:{Server.ADDR[1]}")
+        print(f"[SERVER STARTED] Listening on {Server.SERVER_ADDR}:{Server.PORT}")
 
         while self.server_running:
 
