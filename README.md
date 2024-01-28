@@ -1,6 +1,6 @@
 # PyGOPS
 
-PyGOPS is an implementation in Python of the card game 'Game of Pure Strategy'. It is a client server, terminal based
+PyGOPS is an implementation in Python of the card game 'Game of Pure Strategy'. It is a client - server, terminal based
 implementation of the game allowing players to play with each other remotely.
 
 The purpose of this project is to allow fans GOPS to play it online via terminal with their friends worldwide and also
@@ -9,11 +9,11 @@ allow them to create a server to host games for other fans.
 ## The Game and Rules
 
 The card game is played between two players. A standard deck of 52 cards is split into sets of the suits. One player
-receives a hand consisting of all the Spaded, the other players receives a hand consisting of all the
+receives a hand consisting of all the Spades, the other players receives a hand consisting of all the
 Clubs, the set of Diamond cards is shuffled and placed faced down on the table and finally the Hearts cards are discarded
 as they are not used for the game.
 
-The game consisting of thirteen rounds where the object is to attain as many points as possible by winning the Diamond
+The game consists of thirteen rounds where the object is to attain as many points as possible by winning the Diamond
 cards where the points received are equal to the of the face value of the Diamond cards won. The Jack, Queen and King
 are worth 11, 12 and 13 points respectively and the Ace is worth 1 point.
 
@@ -77,9 +77,9 @@ to start the games list of clients in the game. The handle client thread will th
 game ID which is returned to the client handling thread and then sent back to client as an INFO message. The player can
 then pass this message ID onto the other player they wish to play with.
 
-If a player chooses to connecting to an existing game they are prompted to enter the ID of the game they wish to connect
+If a player chooses to connect to an existing game they are prompted to enter the ID of the game they wish to connect
 to. A "JOIN-GAME" command is then sent to the server with the game ID. The server then checks if the specified game
-exists and if it does it pass the client object of the player requesting to join onto the instance of the game with
+exists and if it does it passes the client object of the player requesting to join onto the instance of the game with
 ID specified. The game instance object then checks if the game is not full, if it isn't full it then adds the new player
 to the list of the clients in the game and initiates the game play procedure. If it is full it lets the client know
 joining the game was unsuccessful and the client then re-initiates the start / join game procedure.
@@ -89,7 +89,7 @@ joining the game was unsuccessful and the client then re-initiates the start / j
 On the server side the game play procedure starts by setting all the game variables (current round, points and cards) to
 their start game defaults. The Diamond cards are then shuffled. and the round procedure is started.
 
-On the client side it starts an indefinite loops controlled by the game-in-play state variable which will continually
+On the client side it starts an indefinite loop controlled by the game-in-play state variable which will continually
 listen for messages from the server one at a time and process them accordingly based on the specified command.
 
 The round procedure starts by sending current round information to each player i.e. the round number, both player's
@@ -98,7 +98,7 @@ clients which then initiates on the client side the process of prompting each pl
 
 Every time a turn is made by the client it is sent as a "PLAY-TURN" command to the server specifying the game ID they
 are currently playing. The handling thread for that client on the server processes the message by finding the matching
-game instance of that ID and then passed the move onto the game instance where it can be processed as a move in the
+game instance of that ID and then passes the move onto the game instance where it can be processed as a move in the
 game as the logic for handling "PLAY-TURN" commands and subsequent responses to the client happens inside the game
 object.
 
