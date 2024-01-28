@@ -46,7 +46,7 @@ def receive_response():
         return message_command, message_body
 
     except Exception as e:
-        print(f"[ERROR] Error in receive_response()")
+        print("[ERROR] Error in receive_response()")
         print(f"[ERROR INFO] {e}")
 
 

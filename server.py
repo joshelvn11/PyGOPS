@@ -62,6 +62,7 @@ class Server:
                 # Ask the user which port they would like to run the server on
                 server_port = input("What port number would you like to start the server on: ")
 
+                # Convert it to an INT and set it the port class variable
                 Server.PORT = int(server_port)
 
             except Exception as e:
@@ -222,7 +223,7 @@ class Server:
                     elif message_command == "START-GAME":
 
                         print("[STARTING GAME]")
-                        message_response = f"INFO~[STARTING NEW GAME]"
+                        message_response = "INFO~[STARTING NEW GAME]"
 
                         # Create new game instance and generate a new game ID for the instance
                         game_instance = game.Game(self, player_instance)

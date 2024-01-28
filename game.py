@@ -166,9 +166,9 @@ class Game:
             # Let players know the game is starting
             # Send both players the current card in play
             for player in self.players:
-                networking.send_message(f"START-GAME~Game is starting...", player.get_socket(), 64)
+                networking.send_message("START-GAME~Game is starting...", player.get_socket(), 64)
         except Exception as e:
-            print(f"[ERROR] Error in start_game() in game.py start game broadcast")
+            print("[ERROR] Error in start_game() in game.py start game broadcast")
             print(f"[ERROR INFO {e}")
 
         # Start the first round
@@ -228,7 +228,7 @@ class Game:
         try:
             card_played = int(card_played)
         except Exception as e:
-            print(f"[ERROR] Error in play_turn() in game.py start game broadcast")
+            print("[ERROR] Error in play_turn() in game.py start game broadcast")
             print(f"[ERROR INFO {e}")
 
         # Check the move is valid
@@ -254,8 +254,8 @@ class Game:
                 if self.player_moves[self.inverse(index)] > 0:
 
                     for player_instance in self.players:
-                        networking.send_message(f"INFO~Both of you have played, let's find out the "
-                                                f"scores...", player_instance.get_socket(), 64)
+                        networking.send_message("INFO~Both of you have played, let's find out the "
+                                                "scores...", player_instance.get_socket(), 64)
 
                     # Start the end round procedure
                     self.end_round()
@@ -313,7 +313,7 @@ class Game:
 
             # Let players know the round winner or if it was a tie
             if self.player_moves[0] == self.player_moves[1]:
-                networking.send_message(f"INFO~It's a tie!", player.get_socket(), 64)
+                networking.send_message("INFO~It's a tie!", player.get_socket(), 64)
             else:
                 networking.send_message(f"INFO~{winner_name} wins this round!", player.get_socket(), 64)
 
@@ -337,7 +337,7 @@ class Game:
         for index, player in enumerate(self.players):
 
             # Send banner
-            networking.send_message(f"INFO~\n\n---------- End of Game ----------",
+            networking.send_message("INFO~\n\n---------- End of Game ----------",
                                     player.get_socket(), 64)
 
             # Send both players points for the game
@@ -352,7 +352,7 @@ class Game:
                 networking.send_message(f"INFO~{self.players[1].get_username()} wins the game!",
                                         player.get_socket(), 64)
             elif self.player_points[0] == self.player_points[1]:
-                networking.send_message(f"INFO~It's a tie!",
+                networking.send_message("INFO~It's a tie!",
                                         player.get_socket(), 64)
 
             networking.send_message("END-GAME~End of game", player.get_socket(), 64)
